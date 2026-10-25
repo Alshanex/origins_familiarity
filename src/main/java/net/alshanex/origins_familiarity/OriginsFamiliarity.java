@@ -1,5 +1,6 @@
 package net.alshanex.origins_familiarity;
 
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -54,7 +55,7 @@ public class OriginsFamiliarity {
         modEventBus.addListener(this::addCreative);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        //modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.COMMON, FOConfig.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -70,5 +71,9 @@ public class OriginsFamiliarity {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
 
+    }
+
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 }
