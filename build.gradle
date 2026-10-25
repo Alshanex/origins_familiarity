@@ -28,6 +28,39 @@ sourceSets.main.resources {
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+    mavenLocal()
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
+        name = "Iron's Maven - Release"
+        url = "https://code.redspace.io/releases"
+    }
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven { url = "https://maven.enginehub.org/repo/" }
+    maven {
+        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+        content {
+            includeGroup("software.bernie.geckolib")
+        }
+    }
+    maven { url = "https://maven.theillusivec4.top" }
+    maven { url = "https://cursemaven.com" }
+    maven { url = "https://maven.blamejared.com" }
+    maven { url = "https://maven.kosmx.dev/" }
 }
 
 base {
@@ -137,6 +170,32 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    //ISS
+    implementation "io.redspace:irons_spellbooks:${irons_spells_version}"
+    compileOnly("curse.maven:irons-lib-1492763:8364894")
+    runtimeOnly("curse.maven:irons-lib-1492763:8364894")
+
+    // GECKOLIB ***************************************************************************************************
+    implementation "software.bernie.geckolib:geckolib-neoforge-${geckolib_version}"
+
+    // CURIOS *****************************************************************************************************
+    implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}+${minecraft_version}"
+
+    // Player Animator *****************************************************************************************************
+    implementation "dev.kosmx.player-anim:player-animation-lib-forge:${player_animator_version}"
+
+    // JEI *****************************************************************************************************
+    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
+    runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
+
+    //FamiliarLib *****************************************************************************************************
+    implementation "libs:familiarslib:${minecraft_version}-${familiarslib_ver}"
+    //implementation "curse.maven:familiarslib-1316458:8059464"
+
+    // Origins *****************************************************************************************************
+    implementation "curse.maven:o-origins-1636345:9309666"
+    implementation "curse.maven:apoli-1631826:9309619"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
