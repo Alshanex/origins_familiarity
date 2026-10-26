@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Flying form.
  */
-public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPet {
+public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPet implements IBoundFamiliar {
     private static final RawAnimation IDLE_FLYING = RawAnimation.begin().thenLoop("idle_flying");
     private static final RawAnimation WALK_FLYING = RawAnimation.begin().thenLoop("walk_flying");
 

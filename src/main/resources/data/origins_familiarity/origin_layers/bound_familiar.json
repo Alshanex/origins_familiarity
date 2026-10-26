@@ -1,0 +1,10 @@
+{
+  "order": 1,
+  "enabled": true,
+  "origins": [
+    "origins_familiarity:terrestrial_familiar",
+    "origins_familiarity:flying_familiar"
+  ],
+  "allow_random": false,
+  "hidden": false
+}

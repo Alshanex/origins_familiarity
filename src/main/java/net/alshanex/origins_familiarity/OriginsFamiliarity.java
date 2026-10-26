@@ -1,5 +1,6 @@
 package net.alshanex.origins_familiarity;
 
+import net.alshanex.origins_familiarity.registry.OFDataAttachments;
 import net.alshanex.origins_familiarity.registry.OFEntityRegistry;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
@@ -37,6 +38,8 @@ public class OriginsFamiliarity {
 
         OFEntityRegistry.register(modEventBus);
         modEventBus.addListener(OFEntityRegistry::registerAttributes);
+
+        OFDataAttachments.register(modEventBus);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);

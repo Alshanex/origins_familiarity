@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 /** Terrestrial form. */
-public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet {
+public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements IBoundFamiliar {
 
     public BoundFamiliarEntity(EntityType<? extends AbstractMeleeSpellCastingPet> type, Level level) {
         super(type, level);

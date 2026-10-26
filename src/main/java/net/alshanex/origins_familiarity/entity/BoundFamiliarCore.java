@@ -33,6 +33,7 @@ public final class BoundFamiliarCore {
                 .add(Attributes.MAX_HEALTH, 40.0)
                 .add(Attributes.FOLLOW_RANGE, 24.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
+                .add(Attributes.ENTITY_INTERACTION_RANGE, 3)
                 .add(Attributes.FLYING_SPEED, 0.5);
     }
 
