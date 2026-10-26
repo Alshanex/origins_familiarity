@@ -4,7 +4,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
-public final class FOConfig {
+public final class OFConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     public static final ModConfigSpec.IntValue STUN_SECONDS = BUILDER
@@ -47,7 +47,4 @@ public final class FOConfig {
             .define("summonWhenCreated", true);
 
     public static final ModConfigSpec SPEC = BUILDER.build();
-
-    private FOConfig() {
-    }
 }

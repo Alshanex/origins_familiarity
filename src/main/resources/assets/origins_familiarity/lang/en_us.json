@@ -1,3 +1,27 @@
 {
+  "entity.origins_familiarity.bound_familiar": "Bound Familiar",
+  "entity.origins_familiarity.bound_flying_familiar": "Bound Familiar",
 
+  "key.categories.origins_familiarity": "Bound Familiar",
+  "key.origins_familiarity.bound_spells": "Bound Familiar Spells",
+
+  "ui.origins_familiarity.form.title": "Your Bound Familiar",
+  "ui.origins_familiarity.form.subtitle": "A familiar is bound to your soul. What shape will it take?",
+  "ui.origins_familiarity.form.terrestrial": "Terrestrial",
+  "ui.origins_familiarity.form.flying": "Flying",
+  "ui.origins_familiarity.form.terrestrial.desc": "Walks at your side. Fights up close as a melee spellcaster, or casts from range with a staff.",
+  "ui.origins_familiarity.form.flying.desc": "Hovers around you. Strikes and retreats as a skirmisher, or casts from the air with a staff.",
+
+  "ui.origins_familiarity.spells.title": "Bound Familiar Spells",
+  "ui.origins_familiarity.spells.empty": "Your bound familiar hasn't learned any spells yet. Right-click it with a spell scroll to teach it one.",
+  "ui.origins_familiarity.spells.level": "Level %s",
+
+  "message.origins_familiarity.bound_created": "A familiar has bound itself to you. It will never leave your side.",
+  "message.origins_familiarity.no_bound_familiar": "You don't have a bound familiar yet",
+  "message.origins_familiarity.cannot_release": "Your bound familiar can't be released",
+  "message.origins_familiarity.cannot_store": "Your bound familiar won't leave your side",
+  "message.origins_familiarity.spell_learned": "Your bound familiar learned %s (level %s)",
+  "message.origins_familiarity.spell_upgraded": "Your bound familiar improved %s to level %s",
+  "message.origins_familiarity.spell_known": "Your bound familiar already knows %s",
+  "message.origins_familiarity.spell_blacklisted": "Your bound familiar can't learn %s"
 }
