@@ -1,9 +1,11 @@
 package net.alshanex.origins_familiarity.entity;
 
+import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import net.alshanex.familiarslib.entity.AbstractMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
 import net.alshanex.origins_familiarity.bound.BoundStun;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -30,17 +32,53 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
 
     @Override
     protected WizardAttackGoal createAttackGoal(float min, float max) {
+        BoundFamiliarCore core = boundCore();
+        BoundFamiliarCore.SpellSet set = core.spellSet();
+
         FamiliarGoals.MeleeSpellCastWarlockAttackGoal<BoundFamiliarEntity> melee =
                 new FamiliarGoals.MeleeSpellCastWarlockAttackGoal<>(this, 1.25f, 40, 60);
+        if (set.gapCloser() != null) {
+            melee.setGapCloserSpell(set.gapCloser().spell(), set.gapCloser().level());
+            melee.setGapCloserDistance(4.0);
+        }
         melee.setMoveset(BoundFamiliarCore.MOVESET);
         melee.setComboChance(.4f);
         melee.setMeleeAttackInverval(10, 20);
         melee.setMeleeMovespeedModifier(1.5f);
         melee.setMeleeBias(0.8f, 0.9f);
-        melee.setSpells(List.of(), List.of(), List.of(), List.of());
+        melee.setSpells(set.attack(), set.defense(), set.movement(), set.support());
         melee.setAllowFleeing(false);
         melee.setSpellQuality(min, max);
+
+        core.setCurrentGoal(melee);
         return melee;
+    }
+
+    @Override
+    public void initiateCastSpell(AbstractSpell spell, int spellLevel) {
+        int level = level().isClientSide ? spellLevel : boundCore().castLevel(spell, spellLevel);
+        super.initiateCastSpell(spell, level);
+    }
+
+    @Override
+    public void rebuildBoundGoal() {
+        WizardAttackGoal old = boundCore().currentGoal();
+        if (old != null) {
+            this.goalSelector.removeGoal(old);
+        }
+        initializeAttackGoal(2);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        boundCore().save(tag);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        boundCore().load(tag);
     }
 
     @Override

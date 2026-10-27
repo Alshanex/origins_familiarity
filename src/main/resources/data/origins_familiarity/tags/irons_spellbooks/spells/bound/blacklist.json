@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "irons_spellbooks:recall", "required": false },
+    { "id": "irons_spellbooks:portal", "required": false },
+    { "id": "irons_spellbooks:summon_horse", "required": false },
+    { "id": "irons_spellbooks:wololo", "required": false },
+    { "id": "irons_spellbooks:telekinesis", "required": false },
+    { "id": "irons_spellbooks:angel_wing", "required": false },
+    { "id": "irons_spellbooks:pocket_dimension", "required": false },
+    { "id": "irons_spellbooks:planar_sight", "required": false }
+  ]
+}

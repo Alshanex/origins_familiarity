@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#familiarslib:movement/close_distance", "required": false }
+  ]
+}

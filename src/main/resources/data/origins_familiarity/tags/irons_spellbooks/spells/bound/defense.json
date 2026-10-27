@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#familiarslib:defense/attack_back", "required": false },
+    { "id": "#familiarslib:defense/self_buff", "required": false }
+  ]
+}

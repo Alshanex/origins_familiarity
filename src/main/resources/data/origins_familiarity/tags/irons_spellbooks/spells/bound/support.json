@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#familiarslib:buffing/safe_buff", "required": false },
+    { "id": "#familiarslib:buffing/unsafe_buff", "required": false },
+    { "id": "#familiarslib:buffing/debuff", "required": false }
+  ]
+}

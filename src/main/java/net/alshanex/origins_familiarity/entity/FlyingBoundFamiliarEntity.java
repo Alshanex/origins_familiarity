@@ -1,10 +1,12 @@
 package net.alshanex.origins_familiarity.entity;
 
+import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import net.alshanex.familiarslib.entity.AbstractFlyingMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
 import net.alshanex.origins_familiarity.bound.BoundStun;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -40,6 +42,9 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
 
     @Override
     protected WizardAttackGoal createAttackGoal(float min, float max) {
+        BoundFamiliarCore core = boundCore();
+        BoundFamiliarCore.SpellSet set = core.spellSet();
+
         FamiliarGoals.FlyingSkirmisherAttackGoal<FlyingBoundFamiliarEntity> skirmisher =
                 new FamiliarGoals.FlyingSkirmisherAttackGoal<>(this, 1.25f, 40, 50);
         skirmisher.setPreferredDistance(6.0f)
@@ -50,13 +55,46 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
                 .setMaxDisengageTicks(50)
                 .setThreatAwarenessRadius(12.0f)
                 .setCrowdedThreshold(3);
+        if (set.gapCloser() != null) {
+            skirmisher.setGapCloserSpell(set.gapCloser().spell(), set.gapCloser().level())
+                    .setGapCloserDistance(3.0);
+        }
         skirmisher.setMoveset(BoundFamiliarCore.MOVESET);
         skirmisher.setComboChance(.4f);
         skirmisher.setMeleeAttackInverval(15, 20);
         skirmisher.setMeleeMovespeedModifier(1.5f);
-        skirmisher.setSpells(List.of(), List.of(), List.of(), List.of());
+        skirmisher.setSpells(set.attack(), set.defense(), set.movement(), set.support());
         skirmisher.setSpellQuality(min, max);
+
+        core.setCurrentGoal(skirmisher);
         return skirmisher;
+    }
+
+    @Override
+    public void initiateCastSpell(AbstractSpell spell, int spellLevel) {
+        int level = level().isClientSide ? spellLevel : boundCore().castLevel(spell, spellLevel);
+        super.initiateCastSpell(spell, level);
+    }
+
+    @Override
+    public void rebuildBoundGoal() {
+        WizardAttackGoal old = boundCore().currentGoal();
+        if (old != null) {
+            this.goalSelector.removeGoal(old);
+        }
+        initializeAttackGoal(2);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        boundCore().save(tag);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        boundCore().load(tag);
     }
 
     @Override

@@ -11,7 +11,6 @@ public final class BoundStun {
 
         familiar.setHealth(familiar.getMaxHealth());
         familiar.clearFire();
-        familiar.setTarget(null);
         if (familiar.isCasting()) {
             familiar.cancelCast();
         }

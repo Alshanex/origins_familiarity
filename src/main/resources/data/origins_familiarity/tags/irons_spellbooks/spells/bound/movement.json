@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#familiarslib:movement/escape", "required": false },
+    { "id": "#familiarslib:movement/close_distance", "required": false }
+  ]
+}
