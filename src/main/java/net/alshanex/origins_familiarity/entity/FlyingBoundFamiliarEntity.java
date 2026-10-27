@@ -3,7 +3,9 @@ package net.alshanex.origins_familiarity.entity;
 import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import net.alshanex.familiarslib.entity.AbstractFlyingMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
+import net.alshanex.origins_familiarity.bound.BoundStun;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -52,6 +54,14 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
         skirmisher.setSpells(List.of(), List.of(), List.of(), List.of());
         skirmisher.setSpellQuality(min, max);
         return skirmisher;
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        if (!level().isClientSide && BoundStun.preventDeath(this)) {
+            return;
+        }
+        super.die(source);
     }
 
     @Override

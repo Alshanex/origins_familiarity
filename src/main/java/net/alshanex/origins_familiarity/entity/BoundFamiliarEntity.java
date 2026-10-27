@@ -3,6 +3,8 @@ package net.alshanex.origins_familiarity.entity;
 import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import net.alshanex.familiarslib.entity.AbstractMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
+import net.alshanex.origins_familiarity.bound.BoundStun;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -37,6 +39,19 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
         melee.setAllowFleeing(false);
         melee.setSpellQuality(min, max);
         return melee;
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        if (!level().isClientSide && BoundStun.preventDeath(this)) {
+            return;
+        }
+        super.die(source);
+    }
+
+    @Override
+    protected boolean hasSitAnimation() {
+        return true;
     }
 
     @Override
