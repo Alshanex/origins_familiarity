@@ -34,24 +34,38 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
     protected WizardAttackGoal createAttackGoal(float min, float max) {
         BoundFamiliarCore core = boundCore();
         BoundFamiliarCore.SpellSet set = core.spellSet();
+        WizardAttackGoal goal;
 
-        FamiliarGoals.MeleeSpellCastWarlockAttackGoal<BoundFamiliarEntity> melee =
-                new FamiliarGoals.MeleeSpellCastWarlockAttackGoal<>(this, 1.25f, 40, 60);
-        if (set.gapCloser() != null) {
-            melee.setGapCloserSpell(set.gapCloser().spell(), set.gapCloser().level());
-            melee.setGapCloserDistance(4.0);
+        if (core.useCasterStyle(set)) {
+            goal = new WizardAttackGoal(this, 1.25f, 35, 60)
+                    .setSpells(set.attack(), set.defense(), set.movement(), set.support())
+                    .setAllowFleeing(true)
+                    .setSpellQuality(min, max);
+        } else {
+            FamiliarGoals.MeleeSpellCastWarlockAttackGoal<BoundFamiliarEntity> melee =
+                    new FamiliarGoals.MeleeSpellCastWarlockAttackGoal<>(this, 1.25f, 40, 60);
+            if (set.gapCloser() != null) {
+                melee.setGapCloserSpell(set.gapCloser().spell(), set.gapCloser().level());
+                melee.setGapCloserDistance(4.0);
+            }
+            melee.setMoveset(BoundFamiliarCore.MOVESET);
+            melee.setComboChance(.4f);
+            melee.setMeleeAttackInverval(10, 20);
+            melee.setMeleeMovespeedModifier(1.5f);
+            melee.setMeleeBias(0.8f, 0.9f);
+            melee.setSpells(set.attack(), set.defense(), set.movement(), set.support());
+            melee.setAllowFleeing(false);
+            melee.setSpellQuality(min, max);
+            goal = melee;
         }
-        melee.setMoveset(BoundFamiliarCore.MOVESET);
-        melee.setComboChance(.4f);
-        melee.setMeleeAttackInverval(10, 20);
-        melee.setMeleeMovespeedModifier(1.5f);
-        melee.setMeleeBias(0.8f, 0.9f);
-        melee.setSpells(set.attack(), set.defense(), set.movement(), set.support());
-        melee.setAllowFleeing(false);
-        melee.setSpellQuality(min, max);
 
-        core.setCurrentGoal(melee);
-        return melee;
+        core.setCurrentGoal(goal);
+        return goal;
+    }
+
+    @Override
+    public boolean canWearCosmeticHat() {
+        return true;
     }
 
     @Override
@@ -126,5 +140,10 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
     @Override
     public int getEyeDyeLayerSlot() {
         return BoundFamiliarCore.EYES_LAYER;
+    }
+
+    @Override
+    public boolean shouldSheathSword() {
+        return false;
     }
 }

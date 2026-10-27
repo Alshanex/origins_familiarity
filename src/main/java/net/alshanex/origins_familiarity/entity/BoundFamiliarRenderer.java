@@ -7,6 +7,7 @@ import io.redspace.ironsspellbooks.render.SpellRenderingHelper;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.render.FamiliarColorLayer;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
+import net.alshanex.origins_familiarity.client.render.BoundHatLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -30,6 +31,8 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
         addRenderLayer(new FamiliarColorLayer<>(this, BoundFamiliarCore.EYES_LAYER,
                 OriginsFamiliarity.id(LAYERS + "_eyes_layer.png"),
                 OriginsFamiliarity.id(LAYERS + "_eyes_layer_bw.png")).glowing());
+
+        addRenderLayer(new BoundHatLayer<>(this));
     }
 
     @Override

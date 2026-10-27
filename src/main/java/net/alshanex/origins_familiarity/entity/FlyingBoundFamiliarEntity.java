@@ -44,30 +44,48 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     protected WizardAttackGoal createAttackGoal(float min, float max) {
         BoundFamiliarCore core = boundCore();
         BoundFamiliarCore.SpellSet set = core.spellSet();
+        WizardAttackGoal goal;
 
-        FamiliarGoals.FlyingSkirmisherAttackGoal<FlyingBoundFamiliarEntity> skirmisher =
-                new FamiliarGoals.FlyingSkirmisherAttackGoal<>(this, 1.25f, 40, 50);
-        skirmisher.setPreferredDistance(6.0f)
-                .setDisengageDistance(8.0f)
-                .setEngageCooldown(30)
-                .setMaxCombosPerEngage(2)
-                .setMaxEngageTicks(60)
-                .setMaxDisengageTicks(50)
-                .setThreatAwarenessRadius(12.0f)
-                .setCrowdedThreshold(3);
-        if (set.gapCloser() != null) {
-            skirmisher.setGapCloserSpell(set.gapCloser().spell(), set.gapCloser().level())
-                    .setGapCloserDistance(3.0);
+        if (core.useCasterStyle(set)) {
+            goal = new FamiliarGoals.FlyingWizardAttackGoal(this, 1f, 35, 55)
+                    .setPreferredHeight(4.0f)
+                    .setCombatRanges(5.0f, 7.0f, 11.0f)
+                    .setThreatAwarenessRadius(10.0f)
+                    .setSpells(set.attack(), set.defense(), set.movement(), set.support())
+                    .setIsFlying()
+                    .setAllowFleeing(true)
+                    .setSpellQuality(min, max);
+        } else {
+            FamiliarGoals.FlyingSkirmisherAttackGoal<FlyingBoundFamiliarEntity> skirmisher =
+                    new FamiliarGoals.FlyingSkirmisherAttackGoal<>(this, 1.25f, 40, 50);
+            skirmisher.setPreferredDistance(6.0f)
+                    .setDisengageDistance(8.0f)
+                    .setEngageCooldown(30)
+                    .setMaxCombosPerEngage(2)
+                    .setMaxEngageTicks(60)
+                    .setMaxDisengageTicks(50)
+                    .setThreatAwarenessRadius(12.0f)
+                    .setCrowdedThreshold(3);
+            if (set.gapCloser() != null) {
+                skirmisher.setGapCloserSpell(set.gapCloser().spell(), set.gapCloser().level())
+                        .setGapCloserDistance(3.0);
+            }
+            skirmisher.setMoveset(BoundFamiliarCore.MOVESET);
+            skirmisher.setComboChance(.4f);
+            skirmisher.setMeleeAttackInverval(15, 20);
+            skirmisher.setMeleeMovespeedModifier(1.5f);
+            skirmisher.setSpells(set.attack(), set.defense(), set.movement(), set.support());
+            skirmisher.setSpellQuality(min, max);
+            goal = skirmisher;
         }
-        skirmisher.setMoveset(BoundFamiliarCore.MOVESET);
-        skirmisher.setComboChance(.4f);
-        skirmisher.setMeleeAttackInverval(15, 20);
-        skirmisher.setMeleeMovespeedModifier(1.5f);
-        skirmisher.setSpells(set.attack(), set.defense(), set.movement(), set.support());
-        skirmisher.setSpellQuality(min, max);
 
-        core.setCurrentGoal(skirmisher);
-        return skirmisher;
+        core.setCurrentGoal(goal);
+        return goal;
+    }
+
+    @Override
+    public boolean canWearCosmeticHat() {
+        return true;
     }
 
     @Override
@@ -159,5 +177,10 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     @Override
     public int getEyeDyeLayerSlot() {
         return BoundFamiliarCore.EYES_LAYER;
+    }
+
+    @Override
+    public boolean shouldSheathSword() {
+        return false;
     }
 }

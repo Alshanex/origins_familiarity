@@ -8,6 +8,7 @@ import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.HelperMethods;
 import net.alshanex.origins_familiarity.bound.BoundSpellbookBonus;
 import net.alshanex.origins_familiarity.util.OFTags;
+import net.alshanex.origins_familiarity.util.WeaponStyle;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -33,6 +34,8 @@ public final class BoundFamiliarCore {
     public static final int EYES_LAYER = 1;
 
     public static final String NBT_SPELLS = "BoundSpells";
+
+    @Nullable private WeaponStyle lastStyle;
 
     /**
      * Melee moveset.
@@ -99,6 +102,11 @@ public final class BoundFamiliarCore {
 
     public void markGoalDirty() {
         this.goalDirty = true;
+    }
+
+    /** Caster when it knows at least one enabled spell, unless it holds a melee weapon. No spells = melee, staff or not. */
+    public boolean useCasterStyle(SpellSet set) {
+        return !set.isEmpty() && WeaponStyle.of(pet.getMainHandItem()) != WeaponStyle.MELEE;
     }
 
     /** Enabled learned spells, sorted into the four categories by spell tags. */
@@ -192,6 +200,12 @@ public final class BoundFamiliarCore {
     // Tick
 
     public void serverTick() {
+        WeaponStyle style = WeaponStyle.of(pet.getMainHandItem());
+        if (style != lastStyle) {
+            lastStyle = style;
+            markGoalDirty();
+        }
+
         if (goalDirty) {
             dirtyTicks++;
             if (currentGoal == null || !currentGoal.isActing() || dirtyTicks > MAX_DIRTY_TICKS) {

@@ -8,25 +8,37 @@ import io.redspace.ironsspellbooks.item.Scroll;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.entity.BoundFamiliarCore;
 import net.alshanex.origins_familiarity.entity.IBoundFamiliar;
+import net.alshanex.origins_familiarity.util.OFTags;
+import net.alshanex.origins_familiarity.util.WeaponStyle;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.HelperMethods;
+import net.alshanex.familiarslib.util.familiars.FamiliarCosmetics;
 import net.alshanex.familiarslib.util.familiars.FamiliarManager;
-import net.alshanex.origins_familiarity.util.OFTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import org.jetbrains.annotations.Nullable;
 
-/** Owner right-clicks on the bound familiar with a spell scroll: it learns the spell. */
+/**
+ * Owner right-clicks on the bound familiar:
+ * - Spell scroll: the familiar learns the spell (unless blacklisted). Scroll is used up.
+ * - Weapon (melee or staff): goes in its main hand. The previous one is given back.
+ * - Hat / helmet / anything wearable on the head: goes on its head. Sneak to choose head for items that are both.
+ * - Sneak + empty main hand: takes the weapon, then the hat back.
+ * Shrunk cosmetics are left to familiarslib.
+ */
 @EventBusSubscriber(modid = OriginsFamiliarity.MODID)
 public final class BoundInteractionHandler {
 
@@ -41,17 +53,78 @@ public final class BoundInteractionHandler {
         }
 
         ItemStack stack = event.getItemStack();
+        if (FamiliarCosmetics.isShrunkCosmetic(stack)) {
+            return;
+        }
         boolean clientSide = player.level().isClientSide;
 
         if (stack.getItem() instanceof Scroll) {
             accept(event, clientSide);
             if (!clientSide) learnSpell(player, familiar, bound, stack);
+            return;
         }
+
+        if (stack.isEmpty()) {
+            if (event.getHand() == InteractionHand.MAIN_HAND && player.isShiftKeyDown()) {
+                EquipmentSlot slot = !familiar.getMainHandItem().isEmpty() ? EquipmentSlot.MAINHAND
+                        : !familiar.getItemBySlot(EquipmentSlot.HEAD).isEmpty() ? EquipmentSlot.HEAD
+                        : null;
+                if (slot != null) {
+                    accept(event, clientSide);
+                    if (!clientSide) unequip(player, familiar, bound, slot);
+                }
+            }
+            return;
+        }
+
+        EquipmentSlot slot = slotFor(familiar, stack, player.isShiftKeyDown());
+        if (slot != null) {
+            accept(event, clientSide);
+            if (!clientSide) equip(player, familiar, bound, stack, slot);
+        }
+    }
+
+    @Nullable
+    private static EquipmentSlot slotFor(AbstractSpellCastingPet familiar, ItemStack stack, boolean sneaking) {
+        boolean hat = isHat(familiar, stack);
+        boolean weapon = WeaponStyle.isWeapon(stack);
+        if (hat && weapon) return sneaking ? EquipmentSlot.HEAD : EquipmentSlot.MAINHAND;
+        if (hat) return EquipmentSlot.HEAD;
+        if (weapon) return EquipmentSlot.MAINHAND;
+        return null;
+    }
+
+    private static boolean isHat(AbstractSpellCastingPet familiar, ItemStack stack) {
+        return stack.is(OFTags.BOUND_HATS)
+                || stack.is(FamiliarCosmetics.HATS)
+                || familiar.getEquipmentSlotForItem(stack) == EquipmentSlot.HEAD;
     }
 
     private static void accept(PlayerInteractEvent.EntityInteract event, boolean clientSide) {
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.sidedSuccess(clientSide));
+    }
+
+    private static void equip(Player player, AbstractSpellCastingPet familiar, IBoundFamiliar bound, ItemStack stack, EquipmentSlot slot) {
+        ItemStack previous = familiar.getItemBySlot(slot).copy();
+        familiar.setItemSlot(slot, stack.copyWithCount(1));
+        familiar.setDropChance(slot, 0.0F);
+        stack.consume(1, player);
+        if (!previous.isEmpty()) {
+            player.getInventory().placeItemBackInInventory(previous);
+        }
+        familiar.level().playSound(null, familiar, SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+        bound.boundCore().markGoalDirty();
+        FamiliarManager.updateFamiliarData(familiar);
+    }
+
+    private static void unequip(Player player, AbstractSpellCastingPet familiar, IBoundFamiliar bound, EquipmentSlot slot) {
+        ItemStack removed = familiar.getItemBySlot(slot).copy();
+        familiar.setItemSlot(slot, ItemStack.EMPTY);
+        player.getInventory().placeItemBackInInventory(removed);
+        familiar.level().playSound(null, familiar, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 1.0F);
+        bound.boundCore().markGoalDirty();
+        FamiliarManager.updateFamiliarData(familiar);
     }
 
     private static void learnSpell(Player player, AbstractSpellCastingPet familiar, IBoundFamiliar bound, ItemStack scroll) {
