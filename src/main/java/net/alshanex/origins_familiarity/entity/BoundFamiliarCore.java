@@ -2,10 +2,13 @@ package net.alshanex.origins_familiarity.entity;
 
 import io.redspace.ironsspellbooks.entity.mobs.goals.melee.AttackAnimationData;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
+import net.alshanex.origins_familiarity.bound.BoundSpellbookBonus;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -17,6 +20,11 @@ public final class BoundFamiliarCore {
     /** Eyes color layer: shrunk dyes. */
     public static final int EYES_LAYER = 1;
 
+    private final AbstractSpellCastingPet pet;
+
+    public BoundFamiliarCore(AbstractSpellCastingPet pet) {
+        this.pet = pet;
+    }
     /**
      * Melee moveset.
      */
@@ -43,5 +51,20 @@ public final class BoundFamiliarCore {
             pet.setDropChance(slot, 0.0F);
         }
         pet.setCanPickUpLoot(false);
+    }
+
+    public void serverTick() {
+        LivingEntity summoner = pet.getSummoner();
+
+        // Never lost to the void: it can't die, so bring it back to its owner
+        if (summoner != null && pet.getY() < pet.level().getMinBuildHeight() - 8) {
+            pet.teleportTo(summoner.getX(), summoner.getY() + 1, summoner.getZ());
+            pet.setDeltaMovement(Vec3.ZERO);
+            pet.resetFallDistance();
+        }
+
+        if (pet.tickCount % 20 == 0 && summoner instanceof ServerPlayer owner && !pet.getIsInHouse()) {
+            BoundSpellbookBonus.apply(pet, owner);
+        }
     }
 }

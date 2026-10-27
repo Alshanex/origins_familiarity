@@ -21,6 +21,9 @@ import java.util.List;
  * Flying form.
  */
 public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPet implements IBoundFamiliar {
+
+    private BoundFamiliarCore boundCore;
+
     private static final RawAnimation IDLE_FLYING = RawAnimation.begin().thenLoop("idle_flying");
     private static final RawAnimation WALK_FLYING = RawAnimation.begin().thenLoop("walk_flying");
 
@@ -54,6 +57,20 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
         skirmisher.setSpells(List.of(), List.of(), List.of(), List.of());
         skirmisher.setSpellQuality(min, max);
         return skirmisher;
+    }
+
+    @Override
+    public BoundFamiliarCore boundCore() {
+        if (boundCore == null) boundCore = new BoundFamiliarCore(this);
+        return boundCore;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide) {
+            boundCore().serverTick();
+        }
     }
 
     @Override

@@ -15,6 +15,8 @@ import java.util.List;
 /** Terrestrial form. */
 public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements IBoundFamiliar {
 
+    private BoundFamiliarCore boundCore;
+
     public BoundFamiliarEntity(EntityType<? extends AbstractMeleeSpellCastingPet> type, Level level) {
         super(type, level);
         BoundFamiliarCore.initEquipment(this);
@@ -39,6 +41,20 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
         melee.setAllowFleeing(false);
         melee.setSpellQuality(min, max);
         return melee;
+    }
+
+    @Override
+    public BoundFamiliarCore boundCore() {
+        if (boundCore == null) boundCore = new BoundFamiliarCore(this);
+        return boundCore;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide) {
+            boundCore().serverTick();
+        }
     }
 
     @Override
