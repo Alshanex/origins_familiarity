@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "net.alshanex.origins_familiarity.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "FamiliarSavedDataAccessor",
+    "FamiliarSavedDataMixin",
+    "FamiliarManagerMixin",
+    "FamiliarStorageMixin",
+    "FamiliarStorageBlockMixin"
+  ],
+  "client": [
+    "FamiliarSelectionScreenMixin",
+    "FamiliarStorageScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

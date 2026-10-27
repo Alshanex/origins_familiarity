@@ -10,6 +10,7 @@ import net.alshanex.origins_familiarity.OFConfig;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.bound.BoundForm;
 import net.alshanex.origins_familiarity.bound.BoundPlayerData;
+import net.alshanex.origins_familiarity.bound.RosterOrder;
 import net.alshanex.origins_familiarity.origins.OriginsCompat;
 import net.alshanex.origins_familiarity.registry.OFDataAttachments;
 import net.minecraft.ChatFormatting;
@@ -71,11 +72,13 @@ public final class BoundFamiliarManager {
             if (tag != null && !typeId.equals(tag.getString("id"))) {
                 convert(player, id, typeId);
             }
+            if (RosterOrder.normalize(store)) {
+                FamiliarSync.state(player);
+            }
             return;
         }
 
         if (id != null && store.isHoused(id)) {
-            // Never leave it out of the selection screen
             store.moveToCarried(id);
             FamiliarRoster.of(player).validate();
             FamiliarSync.snapshot(player, id);
@@ -107,6 +110,7 @@ public final class BoundFamiliarManager {
         if (roster.getSelectedFamiliarId() == null) {
             roster.setSelectedFamiliarId(id);
         }
+        RosterOrder.normalize(FamiliarSavedData.get(player));
         FamiliarSync.snapshot(player, id);
 
         player.displayClientMessage(Component.translatable("message.origins_familiarity.bound_created")

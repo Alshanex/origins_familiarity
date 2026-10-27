@@ -21,8 +21,8 @@
   "layer.origins_familiarity.bound_familiar.name": "Bound Familiar",
   "layer.origins_familiarity.bound_familiar.choose_origin.name": "Choose your Bound Familiar",
   "layer.origins_familiarity.bound_familiar.view_origin.name": "Your Bound Familiar",
-  "origin.origins_familiarity.terrestrial_familiar.name": "Terrestrial Familiar",
+  "origin.origins_familiarity.terrestrial_familiar.name": "Terrestrial",
   "origin.origins_familiarity.terrestrial_familiar.description": "Walks at your side. Fights up close as a melee spellcaster, or casts from range with a staff.",
-  "origin.origins_familiarity.flying_familiar.name": "Flying Familiar",
+  "origin.origins_familiarity.flying_familiar.name": "Flying",
   "origin.origins_familiarity.flying_familiar.description": "Hovers around you. Strikes and retreats as a skirmisher, or casts from the air with a staff."
 }
