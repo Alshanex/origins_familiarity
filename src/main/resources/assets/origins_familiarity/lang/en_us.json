@@ -2,12 +2,14 @@
   "entity.origins_familiarity.bound_familiar": "Bound Familiar",
   "entity.origins_familiarity.bound_flying_familiar": "Bound Familiar",
 
-  "key.categories.origins_familiarity": "Bound Familiar",
+  "key.categories.origins_familiarity": "Origins Familiarity",
   "key.origins_familiarity.bound_spells": "Bound Familiar Spells",
 
   "ui.origins_familiarity.spells.title": "Bound Familiar Spells",
   "ui.origins_familiarity.spells.empty": "Your bound familiar hasn't learned any spells yet. Right-click it with a spell scroll to teach it one.",
   "ui.origins_familiarity.spells.level": "Level %s",
+  "ui.origins_familiarity.spells.enabled": "Enabled: click to disable",
+  "ui.origins_familiarity.spells.disabled": "Disabled: click to enable",
 
   "message.origins_familiarity.bound_created": "A familiar has bound itself to you. It will never leave your side.",
   "message.origins_familiarity.no_bound_familiar": "You don't have a bound familiar yet",

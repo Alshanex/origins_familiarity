@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /** Renderer for both forms, sharing one model and texture set. */
@@ -49,5 +50,11 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
     @Override
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
         return animatable.isInvisible() ? RenderType.itemEntityTranslucentCull(texture) : RenderType.entityCutout(texture);
+    }
+
+    private static final float HELD_ITEM_SCALE = 0.7F;
+    @Override
+    protected void adjustHandItemRendering(PoseStack poseStack, ItemStack stack, T animatable, float partialTick, boolean offhand) {
+        poseStack.scale(HELD_ITEM_SCALE, HELD_ITEM_SCALE, HELD_ITEM_SCALE);
     }
 }
