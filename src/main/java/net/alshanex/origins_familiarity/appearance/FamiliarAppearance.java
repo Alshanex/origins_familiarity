@@ -9,7 +9,7 @@ import java.util.Optional;
 
 /** A bound familiar appearance for some origins, loaded from data/<namespace>/origins_familiarity/familiar_appearance/<id>.json. */
 public record FamiliarAppearance(List<ResourceLocation> origins, Optional<ResourceLocation> model,
-                                 List<String> hiddenWhenFlying, List<String> colorLayers, boolean translucent) {
+                                 List<String> hiddenWhenFlying, List<String> colorLayers, boolean translucent, boolean aquatic) {
     public static final String BODY = "body";
     public static final String EYES = "eyes";
     public static final List<String> DEFAULT_HIDDEN_WHEN_FLYING = List.of("left_leg", "right_leg");
@@ -19,7 +19,8 @@ public record FamiliarAppearance(List<ResourceLocation> origins, Optional<Resour
             ResourceLocation.CODEC.optionalFieldOf("model").forGetter(FamiliarAppearance::model),
             Codec.STRING.listOf().optionalFieldOf("hidden_when_flying", DEFAULT_HIDDEN_WHEN_FLYING).forGetter(FamiliarAppearance::hiddenWhenFlying),
             Codec.STRING.listOf().optionalFieldOf("color_layers", List.of(BODY, EYES)).forGetter(FamiliarAppearance::colorLayers),
-            Codec.BOOL.optionalFieldOf("translucent", false).forGetter(FamiliarAppearance::translucent)
+            Codec.BOOL.optionalFieldOf("translucent", false).forGetter(FamiliarAppearance::translucent),
+            Codec.BOOL.optionalFieldOf("aquatic", false).forGetter(FamiliarAppearance::aquatic)
     ).apply(instance, FamiliarAppearance::new));
 
     /** The id its files are named after: "model" if given, otherwise the appearance's own id. */

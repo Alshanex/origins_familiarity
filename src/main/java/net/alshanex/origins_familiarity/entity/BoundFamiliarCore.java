@@ -6,6 +6,7 @@ import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import io.redspace.ironsspellbooks.entity.mobs.goals.melee.AttackAnimationData;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.HelperMethods;
+import net.alshanex.origins_familiarity.appearance.FamiliarAppearance;
 import net.alshanex.origins_familiarity.appearance.FamiliarAppearances;
 import net.alshanex.origins_familiarity.bound.BoundSpellbookBonus;
 import net.alshanex.origins_familiarity.origins.OriginPowerMirror;
@@ -263,6 +264,12 @@ public final class BoundFamiliarCore {
             }
         }
         return null;
+    }
+
+    /** Whether the current appearance is aquatic: breathes and swims underwater. */
+    public boolean isAquatic() {
+        FamiliarAppearance appearance = FamiliarAppearances.get(pet.level().registryAccess(), ((IBoundFamiliar) pet).appearanceId());
+        return appearance != null && appearance.aquatic();
     }
 
     // Tick

@@ -17,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.fluids.FluidType;
 import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
@@ -223,5 +224,15 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     @Override
     public void setAppearanceId(@Nullable ResourceLocation appearanceId) {
         entityData.set(DATA_APPEARANCE_ID, appearanceId == null ? "" : appearanceId.toString());
+    }
+
+    @Override
+    public boolean canDrownInFluidType(FluidType type) {
+        return !boundCore().isAquatic() && super.canDrownInFluidType(type);
+    }
+
+    @Override
+    public boolean canTeleportIntoWater() {
+        return boundCore().isAquatic();
     }
 }

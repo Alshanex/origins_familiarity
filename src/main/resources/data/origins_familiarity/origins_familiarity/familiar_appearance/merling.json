@@ -1,0 +1,11 @@
+{
+  "origins": [
+    "origins:merling"
+  ],
+  "hidden_when_flying": [],
+  "color_layers": [
+    "body",
+    "eyes"
+  ],
+  "aquatic": true
+}
