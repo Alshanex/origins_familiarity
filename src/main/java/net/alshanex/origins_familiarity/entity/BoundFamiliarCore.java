@@ -8,8 +8,13 @@ import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.HelperMethods;
 import net.alshanex.origins_familiarity.bound.BoundSpellbookBonus;
 import net.alshanex.origins_familiarity.origins.OriginPowerMirror;
+import net.alshanex.origins_familiarity.sets.FamiliarSet;
+import net.alshanex.origins_familiarity.sets.FamiliarSetItem;
+import net.alshanex.origins_familiarity.sets.FamiliarSets;
+import net.alshanex.origins_familiarity.sets.SetBonuses;
 import net.alshanex.origins_familiarity.util.OFTags;
 import net.alshanex.origins_familiarity.util.WeaponStyle;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -20,11 +25,14 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /** State and behaviour shared by both forms of the bound familiar. */
 public final class BoundFamiliarCore {
@@ -37,6 +45,12 @@ public final class BoundFamiliarCore {
     public static final String NBT_SPELLS = "BoundSpells";
 
     @Nullable private WeaponStyle lastStyle;
+
+    public static final String NBT_SET = "BoundSet";
+    private static final String SET_BONUS_PREFIX = "set_bonus";
+
+    private ItemStack setItem = ItemStack.EMPTY;
+    private final List<SetBonuses.Applied> appliedSetBonuses = new ArrayList<>();
 
     /**
      * Melee moveset.
@@ -105,26 +119,71 @@ public final class BoundFamiliarCore {
         this.goalDirty = true;
     }
 
+    /** The worn set's data, or null if none is worn. */
+    @Nullable
+    public FamiliarSet activeSet() {
+        return FamiliarSets.get(pet.level().registryAccess(), ((IBoundFamiliar) pet).equippedSetId());
+    }
+
+    public boolean hasSet() {
+        return !setItem.isEmpty();
+    }
+
+    public void equipSet(ItemStack stack) {
+        setItem = stack.copyWithCount(1);
+        ((IBoundFamiliar) pet).setEquippedSetId(FamiliarSetItem.setId(setItem));
+        markGoalDirty();
+    }
+
+    /** Takes the set off and returns its item (empty if none was worn). */
+    public ItemStack removeSet() {
+        ItemStack removed = setItem;
+        setItem = ItemStack.EMPTY;
+        ((IBoundFamiliar) pet).setEquippedSetId(null);
+        SetBonuses.apply(pet, List.of(), SET_BONUS_PREFIX, appliedSetBonuses);
+        markGoalDirty();
+        return removed;
+    }
+
+    @Nullable
+    public static ResourceLocation readSetId(HolderLookup.Provider registries, CompoundTag familiarTag) {
+        if (!familiarTag.contains(NBT_SET, Tag.TAG_COMPOUND)) return null;
+        ItemStack stack = ItemStack.parseOptional(registries, familiarTag.getCompound(NBT_SET));
+        return stack.isEmpty() ? null : FamiliarSetItem.setId(stack);
+    }
+
     /** Caster when it knows at least one enabled spell, unless it holds a melee weapon. No spells = melee, staff or not. */
     public boolean useCasterStyle(SpellSet set) {
         return !set.isEmpty() && WeaponStyle.of(pet.getMainHandItem()) != WeaponStyle.MELEE;
     }
 
-    /** Enabled learned spells, sorted into the four categories by spell tags. */
+    /** Enabled learned spells plus the worn set's spells, sorted into the four categories by spell tags. */
     public SpellSet spellSet() {
+        Map<AbstractSpell, Integer> active = new LinkedHashMap<>();
+        for (LearnedSpell learned : spells) {
+            if (!learned.enabled()) continue;
+            AbstractSpell spell = SpellRegistry.getSpell(learned.id());
+            if (spell == null || spell == SpellRegistry.none() || !spell.isEnabled()) continue;
+            active.put(spell, learned.level());
+        }
+        FamiliarSet worn = activeSet();
+        if (worn != null) {
+            for (FamiliarSet.SpellBonus bonus : worn.spells()) {
+                AbstractSpell spell = bonus.resolve();
+                if (spell != null) active.merge(spell, bonus.level(), Math::max);
+            }
+        }
+
         List<AbstractSpell> attack = new ArrayList<>();
         List<AbstractSpell> defense = new ArrayList<>();
         List<AbstractSpell> movement = new ArrayList<>();
         List<AbstractSpell> support = new ArrayList<>();
         GapCloser gapCloser = null;
 
-        for (LearnedSpell learned : spells) {
-            if (!learned.enabled()) continue;
-            AbstractSpell spell = SpellRegistry.getSpell(learned.id());
-            if (spell == null || spell == SpellRegistry.none() || !spell.isEnabled()) continue;
-
+        for (Map.Entry<AbstractSpell, Integer> entry : active.entrySet()) {
+            AbstractSpell spell = entry.getKey();
             if (gapCloser == null && HelperMethods.isSpellInTag(spell, OFTags.SPELL_GAP_CLOSER)) {
-                gapCloser = new GapCloser(spell, learned.level());
+                gapCloser = new GapCloser(spell, entry.getValue());
             }
             if (HelperMethods.isSpellInTag(spell, OFTags.SPELL_DEFENSE)) {
                 defense.add(spell);
@@ -150,12 +209,17 @@ public final class BoundFamiliarCore {
      */
     public int castLevel(AbstractSpell spell, int requestedLevel) {
         ResourceLocation id = spell.getSpellResource();
+        int level = 0;
         for (LearnedSpell learned : spells) {
-            if (learned.id().equals(id)) {
-                return Mth.clamp(learned.level(), spell.getMinLevel(), spell.getMaxLevel());
+            if (learned.id().equals(id)) level = learned.level();
+        }
+        FamiliarSet worn = activeSet();
+        if (worn != null) {
+            for (FamiliarSet.SpellBonus bonus : worn.spells()) {
+                if (bonus.spell().equals(id)) level = Math.max(level, bonus.level());
             }
         }
-        return requestedLevel;
+        return level > 0 ? Mth.clamp(level, spell.getMinLevel(), spell.getMaxLevel()) : requestedLevel;
     }
 
     public LearnResult learn(AbstractSpell spell, int level) {
@@ -225,6 +289,11 @@ public final class BoundFamiliarCore {
             pet.resetFallDistance();
         }
 
+        if (pet.tickCount % 20 == 0) {
+            FamiliarSet worn = activeSet();
+            SetBonuses.apply(pet, worn == null ? List.of() : worn.attributes(), SET_BONUS_PREFIX, appliedSetBonuses);
+        }
+
         if (pet.tickCount % 20 == 0 && summoner instanceof ServerPlayer owner && !pet.getIsInHouse()) {
             BoundSpellbookBonus.apply(pet, owner);
             OriginPowerMirror.sync(pet, owner);
@@ -235,11 +304,18 @@ public final class BoundFamiliarCore {
 
     public void save(CompoundTag tag) {
         writeSpells(tag, spells);
+        if (!setItem.isEmpty()) {
+            tag.put(NBT_SET, setItem.save(pet.registryAccess()));
+        }
     }
 
     public void load(CompoundTag tag) {
         spells.clear();
         spells.addAll(readSpells(tag));
+        setItem = tag.contains(NBT_SET, Tag.TAG_COMPOUND)
+                ? ItemStack.parseOptional(pet.registryAccess(), tag.getCompound(NBT_SET))
+                : ItemStack.EMPTY;
+        ((IBoundFamiliar) pet).setEquippedSetId(setItem.isEmpty() ? null : FamiliarSetItem.setId(setItem));
         markGoalDirty();
     }
 

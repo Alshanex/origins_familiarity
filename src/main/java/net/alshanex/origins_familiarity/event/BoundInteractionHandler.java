@@ -8,6 +8,9 @@ import io.redspace.ironsspellbooks.item.Scroll;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.entity.BoundFamiliarCore;
 import net.alshanex.origins_familiarity.entity.IBoundFamiliar;
+import net.alshanex.origins_familiarity.sets.FamiliarSet;
+import net.alshanex.origins_familiarity.sets.FamiliarSetItem;
+import net.alshanex.origins_familiarity.sets.FamiliarSets;
 import net.alshanex.origins_familiarity.util.OFTags;
 import net.alshanex.origins_familiarity.util.WeaponStyle;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
@@ -56,7 +59,14 @@ public final class BoundInteractionHandler {
         if (FamiliarCosmetics.isShrunkCosmetic(stack)) {
             return;
         }
+
         boolean clientSide = player.level().isClientSide;
+
+        if (stack.getItem() instanceof FamiliarSetItem) {
+            accept(event, clientSide);
+            if (!clientSide) equipSet(player, familiar, bound, stack);
+            return;
+        }
 
         if (stack.getItem() instanceof Scroll) {
             accept(event, clientSide);
@@ -66,6 +76,11 @@ public final class BoundInteractionHandler {
 
         if (stack.isEmpty()) {
             if (event.getHand() == InteractionHand.MAIN_HAND && player.isShiftKeyDown()) {
+                if (familiar.getMainHandItem().isEmpty() && bound.boundCore().hasSet()) {
+                    accept(event, clientSide);
+                    if (!clientSide) unequipSet(player, familiar, bound);
+                    return;
+                }
                 EquipmentSlot slot = !familiar.getMainHandItem().isEmpty() ? EquipmentSlot.MAINHAND
                         : !familiar.getItemBySlot(EquipmentSlot.HEAD).isEmpty() ? EquipmentSlot.HEAD
                         : null;
@@ -78,6 +93,14 @@ public final class BoundInteractionHandler {
         }
 
         EquipmentSlot slot = slotFor(familiar, stack, player.isShiftKeyDown());
+        if (bound.boundCore().hasSet() && slotFor(familiar, stack, player.isShiftKeyDown()) == EquipmentSlot.HEAD) {
+            accept(event, clientSide);
+            if (!clientSide) {
+                player.displayClientMessage(Component.translatable("message.origins_familiarity.set_blocks_hat")
+                        .withStyle(ChatFormatting.YELLOW), true);
+            }
+            return;
+        }
         if (slot != null) {
             accept(event, clientSide);
             if (!clientSide) equip(player, familiar, bound, stack, slot);
@@ -124,6 +147,37 @@ public final class BoundInteractionHandler {
         player.getInventory().placeItemBackInInventory(removed);
         familiar.level().playSound(null, familiar, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 1.0F);
         bound.boundCore().markGoalDirty();
+        FamiliarManager.updateFamiliarData(familiar);
+    }
+
+    /** Puts the set on: the current head item and previous set go back to the player. The weapon stays. */
+    private static void equipSet(Player player, AbstractSpellCastingPet familiar, IBoundFamiliar bound, ItemStack stack) {
+        FamiliarSet set = FamiliarSets.get(player.level().registryAccess(), FamiliarSetItem.setId(stack));
+        if (set == null) {
+            player.displayClientMessage(Component.translatable("tooltip.origins_familiarity.set.unknown").withStyle(ChatFormatting.RED), true);
+            return;
+        }
+        ItemStack head = familiar.getItemBySlot(EquipmentSlot.HEAD);
+        if (!head.isEmpty()) {
+            familiar.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+            player.getInventory().placeItemBackInInventory(head);
+        }
+        ItemStack previousSet = bound.boundCore().removeSet();
+        bound.boundCore().equipSet(stack);
+        stack.consume(1, player);
+        if (!previousSet.isEmpty()) {
+            player.getInventory().placeItemBackInInventory(previousSet);
+        }
+        familiar.level().playSound(null, familiar, SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+        FamiliarManager.updateFamiliarData(familiar);
+    }
+
+    private static void unequipSet(Player player, AbstractSpellCastingPet familiar, IBoundFamiliar bound) {
+        ItemStack removed = bound.boundCore().removeSet();
+        if (!removed.isEmpty()) {
+            player.getInventory().placeItemBackInInventory(removed);
+        }
+        familiar.level().playSound(null, familiar, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6F, 1.0F);
         FamiliarManager.updateFamiliarData(familiar);
     }
 

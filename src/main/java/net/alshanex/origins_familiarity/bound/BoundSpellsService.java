@@ -8,6 +8,8 @@ import net.alshanex.familiarslib.data.FamiliarRoster;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarManager;
 import net.alshanex.familiarslib.util.familiars.FamiliarSync;
+import net.alshanex.origins_familiarity.sets.FamiliarSet;
+import net.alshanex.origins_familiarity.sets.FamiliarSets;
 import net.alshanex.origins_familiarity.util.BoundFamiliarManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
@@ -17,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,9 +34,13 @@ public final class BoundSpellsService {
             player.displayClientMessage(Component.translatable("message.origins_familiarity.no_bound_familiar").withStyle(ChatFormatting.YELLOW), true);
             return;
         }
-        List<BoundSpellsPayload.Entry> entries = currentSpells(player, id).stream()
-                .map(spell -> new BoundSpellsPayload.Entry(spell.id(), spell.level(), spell.enabled()))
-                .toList();
+        List<BoundSpellsPayload.Entry> entries = new ArrayList<>();
+        for (LearnedSpell spell : currentSpells(player, id)) {
+            entries.add(new BoundSpellsPayload.Entry(spell.id(), spell.level(), spell.enabled(), false));
+        }
+        for (FamiliarSet.SpellBonus bonus : setSpells(player, id)) {
+            entries.add(new BoundSpellsPayload.Entry(bonus.spell(), bonus.level(), true, true));
+        }
         PacketDistributor.sendToPlayer(player, new BoundSpellsPayload(entries));
     }
 
@@ -68,5 +75,18 @@ public final class BoundSpellsService {
         }
         CompoundTag tag = FamiliarRoster.of(player).getFamiliarData(id);
         return tag == null ? List.of() : BoundFamiliarCore.readSpells(tag);
+    }
+
+    private static List<FamiliarSet.SpellBonus> setSpells(ServerPlayer player, UUID id) {
+        FamiliarSet set;
+        Entity entity = player.serverLevel().getEntity(id);
+        if (entity instanceof IBoundFamiliar bound) {
+            set = bound.boundCore().activeSet();
+        } else {
+            CompoundTag tag = FamiliarRoster.of(player).getFamiliarData(id);
+            set = tag == null ? null : FamiliarSets.get(player.registryAccess(), BoundFamiliarCore.readSetId(player.registryAccess(), tag));
+        }
+        if (set == null) return List.of();
+        return set.spells().stream().filter(bonus -> bonus.resolve() != null).toList();
     }
 }

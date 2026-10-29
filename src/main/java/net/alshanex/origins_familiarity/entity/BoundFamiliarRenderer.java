@@ -1,6 +1,7 @@
 package net.alshanex.origins_familiarity.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.redspace.ironsspellbooks.entity.mobs.HumanoidRenderer;
 import io.redspace.ironsspellbooks.player.ClientMagicData;
 import io.redspace.ironsspellbooks.render.SpellRenderingHelper;
@@ -8,31 +9,47 @@ import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.render.FamiliarColorLayer;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.client.render.BoundHatLayer;
+import net.alshanex.origins_familiarity.client.render.FamiliarSetLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 /** Renderer for both forms, sharing one model and texture set. */
 public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends HumanoidRenderer<T> {
 
     private static final String LAYERS = "textures/entity/layers/bond_familiar";
 
+    /** Set by FamiliarSetItemRenderer while drawing a set item: draw only the set and its helmet, not the familiar. */
+    public static boolean layersOnly = false;
+
+    /** Swallows the familiar's own geometry while layersOnly is on. */
+    private static final VertexConsumer NO_OP = new VertexConsumer() {
+        @Override public VertexConsumer addVertex(float x, float y, float z) { return this; }
+        @Override public VertexConsumer setColor(int r, int g, int b, int a) { return this; }
+        @Override public VertexConsumer setUv(float u, float v) { return this; }
+        @Override public VertexConsumer setUv1(int u, int v) { return this; }
+        @Override public VertexConsumer setUv2(int u, int v) { return this; }
+        @Override public VertexConsumer setNormal(float x, float y, float z) { return this; }
+    };
+
     public BoundFamiliarRenderer(EntityRendererProvider.Context context) {
         super(context, new BoundFamiliarModel<>());
         this.shadowRadius = 0.3f;
         addRenderLayer(new FlyingLegsLayer<>(this));
 
-        addRenderLayer(new FamiliarColorLayer<>(this, BoundFamiliarCore.BODY_LAYER,
+        addRenderLayer(bodyColorLayer(BoundFamiliarCore.BODY_LAYER,
                 OriginsFamiliarity.id(LAYERS + "_body_layer.png"),
                 OriginsFamiliarity.id(LAYERS + "_body_layer_bw.png")));
 
-        addRenderLayer(new FamiliarColorLayer<>(this, BoundFamiliarCore.EYES_LAYER,
+        addRenderLayer(bodyColorLayer(BoundFamiliarCore.EYES_LAYER,
                 OriginsFamiliarity.id(LAYERS + "_eyes_layer.png"),
                 OriginsFamiliarity.id(LAYERS + "_eyes_layer_bw.png")).glowing());
 
+        addRenderLayer(new FamiliarSetLayer<>(this));
         addRenderLayer(new BoundHatLayer<>(this));
     }
 
@@ -56,5 +73,28 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
     @Override
     protected void adjustHandItemRendering(PoseStack poseStack, ItemStack stack, T animatable, float partialTick, boolean offhand) {
         poseStack.scale(HELD_ITEM_SCALE, HELD_ITEM_SCALE, HELD_ITEM_SCALE);
+    }
+
+    @Override
+    public void actuallyRender(PoseStack poseStack, T animatable, BakedGeoModel model, @Nullable RenderType renderType,
+                               MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender,
+                               float partialTick, int packedLight, int packedOverlay, int colour) {
+        if (layersOnly && !isReRender) buffer = NO_OP;
+        super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender,
+                partialTick, packedLight, packedOverlay, colour);
+    }
+
+    /** A body color layer that steps aside while only the layers are drawn. */
+    private FamiliarColorLayer<T> bodyColorLayer(int slot, ResourceLocation defaultTexture, ResourceLocation tintTexture) {
+        return new FamiliarColorLayer<>(this, slot, defaultTexture, tintTexture) {
+            @Override
+            public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, @Nullable RenderType renderType,
+                               MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, float partialTick,
+                               int packedLight, int packedOverlay) {
+                if (!layersOnly) {
+                    super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+                }
+            }
+        };
     }
 }

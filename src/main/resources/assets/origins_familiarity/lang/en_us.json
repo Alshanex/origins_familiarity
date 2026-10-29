@@ -2,14 +2,25 @@
   "entity.origins_familiarity.bound_familiar": "Bound Familiar",
   "entity.origins_familiarity.bound_flying_familiar": "Bound Familiar",
 
+  "item.origins_familiarity.familiar_set": "Familiar Set",
+
+  "familiar_set.origins_familiarity.archmage": "Archmage Familiar Set",
+
+  "tooltip.origins_familiarity.set.unknown": "Unknown set",
+  "tooltip.origins_familiarity.set.familiar_bonuses": "On your bound familiar:",
+  "tooltip.origins_familiarity.set.owner_bonuses": "On you, while it's summoned:",
+  "tooltip.origins_familiarity.set.spells": "Spells (familiar and you):",
+  "tooltip.origins_familiarity.set.spell": "%s (level %s)",
+
   "key.categories.origins_familiarity": "Origins Familiarity",
   "key.origins_familiarity.bound_spells": "Bound Familiar Spells",
 
   "ui.origins_familiarity.spells.title": "Bound Familiar Spells",
-  "ui.origins_familiarity.spells.empty": "Your bound familiar hasn't learned any spells yet. Right-click it with a spell scroll to teach it one.",
+  "ui.origins_familiarity.spells.empty": "Your bound familiar hasn't learned any spells yet.",
   "ui.origins_familiarity.spells.level": "Level %s",
-  "ui.origins_familiarity.spells.enabled": "Enabled: click to disable",
-  "ui.origins_familiarity.spells.disabled": "Disabled: click to enable",
+  "ui.origins_familiarity.spells.enabled": "Enabled",
+  "ui.origins_familiarity.spells.disabled": "Disabled",
+  "ui.origins_familiarity.spells.from_set": "Granted by equipped set",
 
   "message.origins_familiarity.bound_created": "A familiar has bound itself to you. It will never leave your side.",
   "message.origins_familiarity.no_bound_familiar": "You don't have a bound familiar yet",
@@ -19,10 +30,12 @@
   "message.origins_familiarity.spell_upgraded": "Your bound familiar improved %s to level %s",
   "message.origins_familiarity.spell_known": "Your bound familiar already knows %s",
   "message.origins_familiarity.spell_blacklisted": "Your bound familiar can't learn %s",
+  "message.origins_familiarity.set_blocks_hat": "Its set covers its head: take the set off first",
 
   "layer.origins_familiarity.bound_familiar.name": "Bound Familiar",
   "layer.origins_familiarity.bound_familiar.choose_origin.name": "Choose your Bound Familiar",
   "layer.origins_familiarity.bound_familiar.view_origin.name": "Your Bound Familiar",
+
   "origin.origins_familiarity.terrestrial_familiar.name": "Terrestrial",
   "origin.origins_familiarity.terrestrial_familiar.description": "Walks at your side. Fights up close as a melee spellcaster, or casts from range with a staff.",
   "origin.origins_familiarity.flying_familiar.name": "Flying",

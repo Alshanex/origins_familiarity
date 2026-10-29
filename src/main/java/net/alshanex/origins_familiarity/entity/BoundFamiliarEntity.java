@@ -6,16 +6,24 @@ import net.alshanex.familiarslib.entity.AbstractMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
 import net.alshanex.origins_familiarity.bound.BoundStun;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /** Terrestrial form. */
 public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements IBoundFamiliar {
+
+    private static final EntityDataAccessor<String> DATA_SET_ID =
+            SynchedEntityData.defineId(BoundFamiliarEntity.class, EntityDataSerializers.STRING);
 
     private BoundFamiliarCore boundCore;
 
@@ -84,6 +92,12 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
     }
 
     @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_SET_ID, "");
+    }
+
+    @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         boundCore().save(tag);
@@ -145,5 +159,17 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
     @Override
     public boolean shouldSheathSword() {
         return false;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation equippedSetId() {
+        String id = entityData.get(DATA_SET_ID);
+        return id.isEmpty() ? null : ResourceLocation.tryParse(id);
+    }
+
+    @Override
+    public void setEquippedSetId(@Nullable ResourceLocation setId) {
+        entityData.set(DATA_SET_ID, setId == null ? "" : setId.toString());
     }
 }

@@ -7,6 +7,10 @@ import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
 import net.alshanex.origins_familiarity.bound.BoundStun;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -17,12 +21,16 @@ import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * Flying form.
  */
 public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPet implements IBoundFamiliar {
+
+    private static final EntityDataAccessor<String> DATA_SET_ID =
+            SynchedEntityData.defineId(FlyingBoundFamiliarEntity.class, EntityDataSerializers.STRING);
 
     private BoundFamiliarCore boundCore;
 
@@ -104,6 +112,12 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     }
 
     @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_SET_ID, "");
+    }
+
+    @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         boundCore().save(tag);
@@ -182,5 +196,17 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     @Override
     public boolean shouldSheathSword() {
         return false;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation equippedSetId() {
+        String id = entityData.get(DATA_SET_ID);
+        return id.isEmpty() ? null : ResourceLocation.tryParse(id);
+    }
+
+    @Override
+    public void setEquippedSetId(@Nullable ResourceLocation setId) {
+        entityData.set(DATA_SET_ID, setId == null ? "" : setId.toString());
     }
 }

@@ -52,6 +52,8 @@ public class BoundSpellsScreen extends Screen {
     private static final int PANEL_COLOR = 0xCC101018;
     private static final int PANEL_OUTLINE = 0xFF6A4FB3;
 
+    private static final int SET_COLOR = 0xFFE0B040;
+
     /** Desaturated copies of spell icons. */
     private static final Map<ResourceLocation, ResourceLocation> GREYSCALE_ICONS = new HashMap<>();
 
@@ -140,7 +142,7 @@ public class BoundSpellsScreen extends Screen {
         boolean enabled = entry.enabled();
 
         // Outline
-        graphics.fill(x, y, x + CELL, y + CELL, enabled ? ENABLED_COLOR : DISABLED_COLOR);
+        graphics.fill(x, y, x + CELL, y + CELL, entry.fromSet() ? SET_COLOR : enabled ? ENABLED_COLOR : DISABLED_COLOR);
         graphics.fill(x + BORDER, y + BORDER, x + CELL - BORDER, y + CELL - BORDER, CELL_BACKGROUND);
 
         int iconX = x + BORDER;
@@ -194,9 +196,13 @@ public class BoundSpellsScreen extends Screen {
         lines.add(Component.empty());
         lines.add(spell.getSchoolType().getDisplayName().copy());
         lines.add(Component.empty());
-        lines.add(entry.enabled()
-                ? Component.translatable("ui.origins_familiarity.spells.enabled").withStyle(ChatFormatting.GREEN)
-                : Component.translatable("ui.origins_familiarity.spells.disabled").withStyle(ChatFormatting.RED));
+        if (entry.fromSet()) {
+            lines.add(Component.translatable("ui.origins_familiarity.spells.from_set").withStyle(ChatFormatting.GOLD));
+        } else {
+            lines.add(entry.enabled()
+                    ? Component.translatable("ui.origins_familiarity.spells.enabled").withStyle(ChatFormatting.GREEN)
+                    : Component.translatable("ui.origins_familiarity.spells.disabled").withStyle(ChatFormatting.RED));
+        }
         return lines;
     }
 
@@ -272,8 +278,9 @@ public class BoundSpellsScreen extends Screen {
             int index = indexAt(mouseX, mouseY);
             if (index >= 0) {
                 BoundSpellsPayload.Entry entry = entries.get(index);
+                if (entry.fromSet()) return true;
                 boolean enabled = !entry.enabled();
-                entries.set(index, new BoundSpellsPayload.Entry(entry.spell(), entry.level(), enabled)); // optimistic
+                entries.set(index, new BoundSpellsPayload.Entry(entry.spell(), entry.level(), enabled, false));
                 PacketDistributor.sendToServer(new ToggleBoundSpellPayload(entry.spell(), enabled));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 return true;

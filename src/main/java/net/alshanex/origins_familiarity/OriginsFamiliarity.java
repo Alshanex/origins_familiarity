@@ -1,7 +1,12 @@
 package net.alshanex.origins_familiarity;
 
+import net.alshanex.familiarslib.registry.FCreativeTab;
 import net.alshanex.origins_familiarity.registry.OFDataAttachments;
+import net.alshanex.origins_familiarity.registry.OFDataComponents;
 import net.alshanex.origins_familiarity.registry.OFEntityRegistry;
+import net.alshanex.origins_familiarity.registry.OFItems;
+import net.alshanex.origins_familiarity.sets.FamiliarSetItem;
+import net.alshanex.origins_familiarity.sets.FamiliarSets;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -16,6 +21,8 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+
+import java.util.Comparator;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(OriginsFamiliarity.MODID)
@@ -41,8 +48,13 @@ public class OriginsFamiliarity {
 
         OFDataAttachments.register(modEventBus);
 
+        OFDataComponents.register(modEventBus);
+
+        OFItems.register(modEventBus);
+
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(FamiliarSets::registerRegistry);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, OFConfig.SPEC);
@@ -54,7 +66,12 @@ public class OriginsFamiliarity {
 
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-
+        if (event.getTabKey() == FCreativeTab.MAIN_TAB.getKey()) {
+            event.getParameters().holders().lookup(FamiliarSets.REGISTRY_KEY).ifPresent(sets -> sets.listElementIds()
+                    .map(key -> key.location())
+                    .sorted(Comparator.comparing(ResourceLocation::toString))
+                    .forEach(id -> event.accept(FamiliarSetItem.create(id))));
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

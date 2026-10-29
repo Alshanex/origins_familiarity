@@ -13,6 +13,7 @@ import net.alshanex.origins_familiarity.bound.BoundPlayerData;
 import net.alshanex.origins_familiarity.bound.RosterOrder;
 import net.alshanex.origins_familiarity.origins.OriginsCompat;
 import net.alshanex.origins_familiarity.registry.OFDataAttachments;
+import net.alshanex.origins_familiarity.sets.SetOwnerBonuses;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -48,6 +49,9 @@ public final class BoundFamiliarManager {
     /** Server, every player tick. */
     public static void tick(ServerPlayer player) {
         if (player.tickCount % 20 != 0) return;
+
+        SetOwnerBonuses.tick(player, data(player).boundId());
+
         if (!OriginsCompat.hasFinishedChoosing(player)) return;
 
         BoundForm form = formFromOrigins(player);

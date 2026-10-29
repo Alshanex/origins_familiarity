@@ -1,0 +1,16 @@
+{
+  "helmet": {
+    "id": "irons_spellbooks:wizard_hat",
+    "components": { "minecraft:dyed_color": { "rgb": 7184612 } }
+  },
+  "attributes": [
+    { "attribute": "irons_spellbooks:spell_power", "amount": 0.15, "operation": "add_multiplied_base" },
+    { "attribute": "minecraft:generic.armor", "amount": 4 }
+  ],
+  "owner_attributes": [
+    { "attribute": "irons_spellbooks:max_mana", "amount": 50 }
+  ],
+  "spells": [
+    { "spell": "irons_spellbooks:magic_missile", "level": 5 }
+  ]
+}

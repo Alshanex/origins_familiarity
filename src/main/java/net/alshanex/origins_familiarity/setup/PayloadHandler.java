@@ -4,6 +4,7 @@ import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.bound.BoundSpellsService;
 import net.alshanex.origins_familiarity.client.ClientAccess;
 import net.alshanex.origins_familiarity.network.BoundSpellsPayload;
+import net.alshanex.origins_familiarity.network.OwnerSetPayload;
 import net.alshanex.origins_familiarity.network.RequestBoundSpellsPayload;
 import net.alshanex.origins_familiarity.network.ToggleBoundSpellPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +22,9 @@ public class PayloadHandler {
         // Client-bound
         payloadRegistrar.playToClient(BoundSpellsPayload.TYPE, BoundSpellsPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> ClientAccess.showBoundSpells(payload)));
+
+        payloadRegistrar.playToClient(OwnerSetPayload.TYPE, OwnerSetPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> ClientAccess.onOwnerSet(payload)));
 
         // Server
         payloadRegistrar.playToServer(RequestBoundSpellsPayload.TYPE, RequestBoundSpellsPayload.STREAM_CODEC,
