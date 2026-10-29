@@ -17,16 +17,16 @@ public class BoundFamiliarModel<T extends AbstractSpellCastingPet> extends Defau
 
     @Override
     public ResourceLocation getModelResource(T animatable) {
-        return MODEL;
+        return AppearanceResources.model(animatable);
     }
 
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
-        return ANIMATIONS;
+        return AppearanceResources.animations(animatable);
     }
 
     @Override
     public ResourceLocation getTextureResource(T animatable) {
-        return TEXTURE;
+        return AppearanceResources.texture(animatable);
     }
 }

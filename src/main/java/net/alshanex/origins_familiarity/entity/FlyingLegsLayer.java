@@ -16,7 +16,6 @@ import java.util.List;
  * Hides the leg bones for the flying form.
  */
 public class FlyingLegsLayer<T extends AbstractSpellCastingPet> extends GeoRenderLayer<T> {
-    public static final List<String> LEG_BONES = List.of("left_leg", "right_leg");
 
     public FlyingLegsLayer(GeoRenderer<T> renderer) {
         super(renderer);
@@ -27,7 +26,7 @@ public class FlyingLegsLayer<T extends AbstractSpellCastingPet> extends GeoRende
                           MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, float partialTick,
                           int packedLight, int packedOverlay) {
         boolean hide = animatable instanceof FlyingBoundFamiliarEntity;
-        for (String name : LEG_BONES) {
+        for (String name : AppearanceResources.hiddenWhenFlying(animatable)) {
             bakedModel.getBone(name).ifPresent(bone -> {
                 bone.setHidden(hide);
                 bone.setChildrenHidden(hide);

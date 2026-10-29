@@ -8,6 +8,7 @@ import io.redspace.ironsspellbooks.render.SpellRenderingHelper;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.render.FamiliarColorLayer;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
+import net.alshanex.origins_familiarity.appearance.FamiliarAppearance;
 import net.alshanex.origins_familiarity.client.render.BoundHatLayer;
 import net.alshanex.origins_familiarity.client.render.FamiliarSetLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,11 +18,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.util.ClientUtil;
 
 /** Renderer for both forms, sharing one model and texture set. */
 public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends HumanoidRenderer<T> {
-
-    private static final String LAYERS = "textures/entity/layers/bond_familiar";
 
     /** Set by FamiliarSetItemRenderer while drawing a set item: draw only the set and its helmet, not the familiar. */
     public static boolean layersOnly = false;
@@ -41,13 +41,8 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
         this.shadowRadius = 0.3f;
         addRenderLayer(new FlyingLegsLayer<>(this));
 
-        addRenderLayer(bodyColorLayer(BoundFamiliarCore.BODY_LAYER,
-                OriginsFamiliarity.id(LAYERS + "_body_layer.png"),
-                OriginsFamiliarity.id(LAYERS + "_body_layer_bw.png")));
-
-        addRenderLayer(bodyColorLayer(BoundFamiliarCore.EYES_LAYER,
-                OriginsFamiliarity.id(LAYERS + "_eyes_layer.png"),
-                OriginsFamiliarity.id(LAYERS + "_eyes_layer_bw.png")).glowing());
+        addRenderLayer(bodyColorLayer(BoundFamiliarCore.BODY_LAYER, FamiliarAppearance.BODY));
+        addRenderLayer(bodyColorLayer(BoundFamiliarCore.EYES_LAYER, FamiliarAppearance.EYES).glowing());
 
         addRenderLayer(new FamiliarSetLayer<>(this));
         addRenderLayer(new BoundHatLayer<>(this));
@@ -55,7 +50,7 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return BoundFamiliarModel.TEXTURE;
+        return AppearanceResources.texture(entity);
     }
 
     @Override
@@ -66,6 +61,9 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
 
     @Override
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+        if (AppearanceResources.translucent(animatable)) {
+            return RenderType.entityTranslucent(texture);
+        }
         return animatable.isInvisible() ? RenderType.itemEntityTranslucentCull(texture) : RenderType.entityCutout(texture);
     }
 
@@ -84,9 +82,9 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
                 partialTick, packedLight, packedOverlay, colour);
     }
 
-    /** A body color layer that steps aside while only the layers are drawn. */
-    private FamiliarColorLayer<T> bodyColorLayer(int slot, ResourceLocation defaultTexture, ResourceLocation tintTexture) {
-        return new FamiliarColorLayer<>(this, slot, defaultTexture, tintTexture) {
+    /** A dye layer whose textures follow the familiar's appearance, and that steps aside while only the layers are drawn. */
+    private FamiliarColorLayer<T> bodyColorLayer(int slot, String layerName) {
+        return new FamiliarColorLayer<>(this, slot, null, null) {
             @Override
             public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, @Nullable RenderType renderType,
                                MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, float partialTick,
@@ -94,6 +92,28 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
                 if (!layersOnly) {
                     super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
                 }
+            }
+
+            @Nullable
+            @Override
+            protected ResourceLocation getDefaultTexture(T animatable) {
+                return AppearanceResources.layerTexture(animatable, layerName, false);
+            }
+
+            @Nullable
+            @Override
+            protected ResourceLocation getTintTexture(T animatable) {
+                return AppearanceResources.layerTexture(animatable, layerName, true);
+            }
+
+            @Nullable
+            @Override
+            protected RenderType getLayerRenderType(T animatable, ResourceLocation texture) {
+                if (AppearanceResources.translucent(animatable)) {
+                    if (animatable.isInvisible() && animatable.isInvisibleTo(ClientUtil.getClientPlayer())) return null;
+                    return RenderType.entityTranslucent(texture);
+                }
+                return super.getLayerRenderType(animatable, texture);
             }
         };
     }

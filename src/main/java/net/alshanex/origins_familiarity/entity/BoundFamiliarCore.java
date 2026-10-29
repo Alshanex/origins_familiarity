@@ -6,6 +6,7 @@ import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import io.redspace.ironsspellbooks.entity.mobs.goals.melee.AttackAnimationData;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.HelperMethods;
+import net.alshanex.origins_familiarity.appearance.FamiliarAppearances;
 import net.alshanex.origins_familiarity.bound.BoundSpellbookBonus;
 import net.alshanex.origins_familiarity.origins.OriginPowerMirror;
 import net.alshanex.origins_familiarity.sets.FamiliarSet;
@@ -51,6 +52,8 @@ public final class BoundFamiliarCore {
 
     private ItemStack setItem = ItemStack.EMPTY;
     private final List<SetBonuses.Applied> appliedSetBonuses = new ArrayList<>();
+
+    public static final String NBT_APPEARANCE = "BoundAppearance";
 
     /**
      * Melee moveset.
@@ -296,6 +299,7 @@ public final class BoundFamiliarCore {
 
         if (pet.tickCount % 20 == 0 && summoner instanceof ServerPlayer owner && !pet.getIsInHouse()) {
             BoundSpellbookBonus.apply(pet, owner);
+            ((IBoundFamiliar) pet).setAppearanceId(FamiliarAppearances.forOwner(owner));
             OriginPowerMirror.sync(pet, owner);
         }
     }
@@ -307,6 +311,10 @@ public final class BoundFamiliarCore {
         if (!setItem.isEmpty()) {
             tag.put(NBT_SET, setItem.save(pet.registryAccess()));
         }
+        ResourceLocation appearance = ((IBoundFamiliar) pet).appearanceId();
+        if (appearance != null) {
+            tag.putString(NBT_APPEARANCE, appearance.toString());
+        }
     }
 
     public void load(CompoundTag tag) {
@@ -317,6 +325,8 @@ public final class BoundFamiliarCore {
                 : ItemStack.EMPTY;
         ((IBoundFamiliar) pet).setEquippedSetId(setItem.isEmpty() ? null : FamiliarSetItem.setId(setItem));
         markGoalDirty();
+        ((IBoundFamiliar) pet).setAppearanceId(tag.contains(NBT_APPEARANCE)
+                ? ResourceLocation.tryParse(tag.getString(NBT_APPEARANCE)) : null);
     }
 
     public static List<LearnedSpell> readSpells(CompoundTag familiarTag) {

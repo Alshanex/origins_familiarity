@@ -15,4 +15,10 @@ public interface IBoundFamiliar {
     ResourceLocation equippedSetId();
 
     void setEquippedSetId(@Nullable ResourceLocation setId);
+
+    /** Id of the appearance picked from the owner's origin, synced to clients. Null = base look. */
+    @Nullable
+    ResourceLocation appearanceId();
+
+    void setAppearanceId(@Nullable ResourceLocation appearanceId);
 }

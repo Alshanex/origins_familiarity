@@ -18,10 +18,17 @@ import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 import software.bernie.geckolib.util.ClientUtil;
 
+import java.util.Optional;
+import java.util.Set;
+
 /**
  * Draws the worn set's model.
  */
 public class FamiliarSetLayer<T extends AbstractSpellCastingPet> extends GeoRenderLayer<T> {
+
+    /** Bones of the base bond familiar that sets attach to. If an appearance removes one, the set's pieces on it are hidden. */
+    private static final Set<String> BASE_BONES = Set.of(
+            "body", "left_arm", "right_arm", "left_leg", "right_leg", "bipedHandRight", "bound_hat");
 
     public FamiliarSetLayer(GeoRenderer<T> renderer) {
         super(renderer);
@@ -55,7 +62,9 @@ public class FamiliarSetLayer<T extends AbstractSpellCastingPet> extends GeoRend
 
     /** Copies the pose of the same-named familiar bone onto a set bone, then does the same for its children. */
     private static void follow(GeoBone setBone, BakedGeoModel familiarModel) {
-        familiarModel.getBone(setBone.getName()).ifPresent(source -> {
+        Optional<GeoBone> match = familiarModel.getBone(setBone.getName());
+        if (match.isPresent()) {
+            GeoBone source = match.get();
             setBone.setRotX(source.getRotX());
             setBone.setRotY(source.getRotY());
             setBone.setRotZ(source.getRotZ());
@@ -67,7 +76,12 @@ public class FamiliarSetLayer<T extends AbstractSpellCastingPet> extends GeoRend
             setBone.setScaleZ(source.getScaleZ());
             setBone.setHidden(source.isHidden());
             setBone.setChildrenHidden(source.isHidingChildren());
-        });
+        } else if (BASE_BONES.contains(setBone.getName())) {
+            // This appearance has no such body part (e.g. a legless slime): hide the set's pieces for it
+            setBone.setHidden(true);
+            setBone.setChildrenHidden(true);
+            return;
+        }
         for (GeoBone child : setBone.getChildBones()) {
             follow(child, familiarModel);
         }

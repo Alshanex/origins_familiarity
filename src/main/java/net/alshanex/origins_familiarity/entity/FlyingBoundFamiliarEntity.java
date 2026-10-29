@@ -31,6 +31,8 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
 
     private static final EntityDataAccessor<String> DATA_SET_ID =
             SynchedEntityData.defineId(FlyingBoundFamiliarEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<String> DATA_APPEARANCE_ID =
+            SynchedEntityData.defineId(FlyingBoundFamiliarEntity.class, EntityDataSerializers.STRING);
 
     private BoundFamiliarCore boundCore;
 
@@ -115,6 +117,7 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_SET_ID, "");
+        builder.define(DATA_APPEARANCE_ID, "");
     }
 
     @Override
@@ -208,5 +211,17 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     @Override
     public void setEquippedSetId(@Nullable ResourceLocation setId) {
         entityData.set(DATA_SET_ID, setId == null ? "" : setId.toString());
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation appearanceId() {
+        String id = entityData.get(DATA_APPEARANCE_ID);
+        return id.isEmpty() ? null : ResourceLocation.tryParse(id);
+    }
+
+    @Override
+    public void setAppearanceId(@Nullable ResourceLocation appearanceId) {
+        entityData.set(DATA_APPEARANCE_ID, appearanceId == null ? "" : appearanceId.toString());
     }
 }

@@ -75,11 +75,30 @@ public final class OriginPowerMirror {
 
         Set<ResourceLocation> result = new HashSet<>();
         for (ResourceLocation power : ownerPowers.allPowers()) {
-            if (isFromOrigin(ownerPowers.sourcesOf(power)) && isPassive(power)) {
-                result.add(power);
+            if (isFromOrigin(ownerPowers.sourcesOf(power))) {
+                addShareable(power, result, 0);
             }
         }
         return result;
+    }
+
+    /**
+     * Adds a power if the familiar can use it. A "multiple" power is split: each of its sub-powers is judged and added on its own.
+     */
+    private static void addShareable(ResourceLocation powerId, Set<ResourceLocation> out, int depth) {
+        Power power = ApoliPowers.get(powerId);
+        if (power == null || depth > 4) return;
+
+        if (power.config() instanceof MultiplePower.Cfg multiple && !power.hasTag(TAG_ALWAYS)) {
+            if (power.hasTag(TAG_NEVER) || NeverSharePowers.INSTANCE.isNeverShared(powerId, power)) return;
+            for (ResourceLocation sub : multiple.subPowerIds()) {
+                addShareable(sub, out, depth + 1);
+            }
+            return;
+        }
+        if (isPassive(powerId)) {
+            out.add(powerId);
+        }
     }
 
     private static boolean isFromOrigin(Set<ResourceLocation> sources) {
