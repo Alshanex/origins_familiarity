@@ -7,6 +7,7 @@ import io.redspace.ironsspellbooks.entity.mobs.goals.melee.AttackAnimationData;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
 import net.alshanex.familiarslib.util.HelperMethods;
 import net.alshanex.origins_familiarity.bound.BoundSpellbookBonus;
+import net.alshanex.origins_familiarity.origins.OriginPowerMirror;
 import net.alshanex.origins_familiarity.util.OFTags;
 import net.alshanex.origins_familiarity.util.WeaponStyle;
 import net.minecraft.nbt.CompoundTag;
@@ -226,6 +227,7 @@ public final class BoundFamiliarCore {
 
         if (pet.tickCount % 20 == 0 && summoner instanceof ServerPlayer owner && !pet.getIsInHouse()) {
             BoundSpellbookBonus.apply(pet, owner);
+            OriginPowerMirror.sync(pet, owner);
         }
     }
 
