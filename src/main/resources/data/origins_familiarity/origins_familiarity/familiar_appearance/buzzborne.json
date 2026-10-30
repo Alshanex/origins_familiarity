@@ -1,0 +1,10 @@
+{
+  "origins": [
+    "origins:buzzborne"
+  ],
+  "color_layers": [
+    "body",
+    "eyes"
+  ],
+  "translucent": true
+}
