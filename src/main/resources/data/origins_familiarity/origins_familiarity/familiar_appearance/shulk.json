@@ -1,0 +1,6 @@
+{
+  "origins": ["origins:shulk"],
+  "hidden_when_flying": [],
+  "color_layers": ["body", "eyes"],
+  "shadow": "hidden_while_moving"
+}

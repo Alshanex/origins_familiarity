@@ -3,6 +3,7 @@ package net.alshanex.origins_familiarity.appearance;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +11,7 @@ import java.util.Optional;
 /** A bound familiar appearance for some origins, loaded from data/<namespace>/origins_familiarity/familiar_appearance/<id>.json. */
 public record FamiliarAppearance(List<ResourceLocation> origins, Optional<ResourceLocation> model,
                                  List<String> hiddenWhenFlying, List<String> colorLayers, boolean translucent,
-                                 boolean aquatic, float alpha, Optional<Phasing> phasing) {
+                                 boolean aquatic, float alpha, Optional<Phasing> phasing, ShadowMode shadow) {
     public static final String BODY = "body";
     public static final String EYES = "eyes";
     public static final List<String> DEFAULT_HIDDEN_WHEN_FLYING = List.of("left_leg", "right_leg");
@@ -23,7 +24,8 @@ public record FamiliarAppearance(List<ResourceLocation> origins, Optional<Resour
             Codec.BOOL.optionalFieldOf("translucent", false).forGetter(FamiliarAppearance::translucent),
             Codec.BOOL.optionalFieldOf("aquatic", false).forGetter(FamiliarAppearance::aquatic),
             Codec.floatRange(0.0F, 1.0F).optionalFieldOf("alpha", 1.0F).forGetter(FamiliarAppearance::alpha),
-            Phasing.CODEC.optionalFieldOf("phasing").forGetter(FamiliarAppearance::phasing)
+            Phasing.CODEC.optionalFieldOf("phasing").forGetter(FamiliarAppearance::phasing),
+            ShadowMode.CODEC.optionalFieldOf("shadow", ShadowMode.NORMAL).forGetter(FamiliarAppearance::shadow)
     ).apply(instance, FamiliarAppearance::new));
 
     public record Phasing(ResourceLocation power, float alpha) {
@@ -31,6 +33,24 @@ public record FamiliarAppearance(List<ResourceLocation> origins, Optional<Resour
                 ResourceLocation.CODEC.fieldOf("power").forGetter(Phasing::power),
                 Codec.floatRange(0.0F, 1.0F).optionalFieldOf("alpha", 0.3F).forGetter(Phasing::alpha)
         ).apply(instance, Phasing::new));
+    }
+
+    public enum ShadowMode implements StringRepresentable {
+        NORMAL("normal"),
+        NONE("none"),
+        HIDDEN_WHILE_MOVING("hidden_while_moving");
+
+        public static final Codec<ShadowMode> CODEC = StringRepresentable.fromEnum(ShadowMode::values);
+        private final String name;
+
+        ShadowMode(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return name;
+        }
     }
 
     /** The id its files are named after: "model" if given, otherwise the appearance's own id. */

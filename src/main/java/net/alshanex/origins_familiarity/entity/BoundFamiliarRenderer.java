@@ -55,6 +55,15 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
     }
 
     @Override
+    protected float getShadowRadius(T entity) {
+        return switch (AppearanceResources.shadow(entity)) {
+            case NONE -> 0.0F;
+            case HIDDEN_WHILE_MOVING -> entity.walkAnimation.isMoving() ? 0.0F : super.getShadowRadius(entity);
+            case NORMAL -> super.getShadowRadius(entity);
+        };
+    }
+
+    @Override
     public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         SpellRenderingHelper.renderSpellHelper(ClientMagicData.getSyncedSpellData(animatable), animatable, poseStack, bufferSource, partialTick);

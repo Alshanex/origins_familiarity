@@ -98,4 +98,9 @@ public final class AppearanceResources {
     public static boolean needsTranslucency(Entity entity) {
         return translucent(entity) || alpha(entity) < 1.0F;
     }
+
+    public static FamiliarAppearance.ShadowMode shadow(Entity entity) {
+        Resolved resolved = resolve(entity);
+        return resolved == null ? FamiliarAppearance.ShadowMode.NORMAL : resolved.appearance().shadow();
+    }
 }
