@@ -98,11 +98,6 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
     }
 
     @Override
-    public boolean canWearCosmeticHat() {
-        return true;
-    }
-
-    @Override
     public void initiateCastSpell(AbstractSpell spell, int spellLevel) {
         int level = level().isClientSide ? spellLevel : boundCore().castLevel(spell, spellLevel);
         super.initiateCastSpell(spell, level);

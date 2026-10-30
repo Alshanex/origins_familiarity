@@ -30,7 +30,6 @@
   "message.origins_familiarity.spell_upgraded": "Your bound familiar improved %s to level %s",
   "message.origins_familiarity.spell_known": "Your bound familiar already knows %s",
   "message.origins_familiarity.spell_blacklisted": "Your bound familiar can't learn %s",
-  "message.origins_familiarity.set_blocks_hat": "Its set covers its head: take the set off first",
 
   "layer.origins_familiarity.bound_familiar.name": "Bound Familiar",
   "layer.origins_familiarity.bound_familiar.choose_origin.name": "Choose your Bound Familiar",

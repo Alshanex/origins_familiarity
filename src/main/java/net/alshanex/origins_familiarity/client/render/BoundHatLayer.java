@@ -22,14 +22,8 @@ public class BoundHatLayer<T extends AbstractSpellCastingPet> extends FamiliarHa
     @Override
     protected ItemStack getArmorItemForBone(GeoBone bone, T animatable) {
         if (!BONE.equals(bone.getName())) return null;
-
-        if (animatable instanceof IBoundFamiliar bound && bound.equippedSetId() != null) {
-            FamiliarSet set = FamiliarSets.get(animatable.level().registryAccess(), bound.equippedSetId());
-            return set == null ? null : set.helmet().orElse(null);
-        }
-
-        ItemStack head = animatable.getItemBySlot(EquipmentSlot.HEAD);
-        if (!head.isEmpty()) return head;
-        return super.getArmorItemForBone(bone, animatable);
+        if (!(animatable instanceof IBoundFamiliar bound) || bound.equippedSetId() == null) return null;
+        FamiliarSet set = FamiliarSets.get(animatable.level().registryAccess(), bound.equippedSetId());
+        return set == null ? null : set.helmet().orElse(null);
     }
 }

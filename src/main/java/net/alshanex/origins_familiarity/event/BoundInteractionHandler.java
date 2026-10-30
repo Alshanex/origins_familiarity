@@ -38,7 +38,6 @@ import org.jetbrains.annotations.Nullable;
  * Owner right-clicks on the bound familiar:
  * - Spell scroll: the familiar learns the spell (unless blacklisted). Scroll is used up.
  * - Weapon (melee or staff): goes in its main hand. The previous one is given back.
- * - Hat / helmet / anything wearable on the head: goes on its head. Sneak to choose head for items that are both.
  * - Sneak + empty main hand: takes the weapon, then the hat back.
  * Shrunk cosmetics are left to familiarslib.
  */
@@ -92,14 +91,10 @@ public final class BoundInteractionHandler {
             return;
         }
 
-        EquipmentSlot slot = slotFor(familiar, stack, player.isShiftKeyDown());
-        if (bound.boundCore().hasSet() && slotFor(familiar, stack, player.isShiftKeyDown()) == EquipmentSlot.HEAD) {
+        EquipmentSlot slot = slotFor(stack);
+        if (slot != null) {
             accept(event, clientSide);
-            if (!clientSide) {
-                player.displayClientMessage(Component.translatable("message.origins_familiarity.set_blocks_hat")
-                        .withStyle(ChatFormatting.YELLOW), true);
-            }
-            return;
+            if (!clientSide) equip(player, familiar, bound, stack, slot);
         }
         if (slot != null) {
             accept(event, clientSide);
@@ -108,19 +103,8 @@ public final class BoundInteractionHandler {
     }
 
     @Nullable
-    private static EquipmentSlot slotFor(AbstractSpellCastingPet familiar, ItemStack stack, boolean sneaking) {
-        boolean hat = isHat(familiar, stack);
-        boolean weapon = WeaponStyle.isWeapon(stack);
-        if (hat && weapon) return sneaking ? EquipmentSlot.HEAD : EquipmentSlot.MAINHAND;
-        if (hat) return EquipmentSlot.HEAD;
-        if (weapon) return EquipmentSlot.MAINHAND;
-        return null;
-    }
-
-    private static boolean isHat(AbstractSpellCastingPet familiar, ItemStack stack) {
-        return stack.is(OFTags.BOUND_HATS)
-                || stack.is(FamiliarCosmetics.HATS)
-                || familiar.getEquipmentSlotForItem(stack) == EquipmentSlot.HEAD;
+    private static EquipmentSlot slotFor(ItemStack stack) {
+        return WeaponStyle.isWeapon(stack) ? EquipmentSlot.MAINHAND : null;
     }
 
     private static void accept(PlayerInteractEvent.EntityInteract event, boolean clientSide) {

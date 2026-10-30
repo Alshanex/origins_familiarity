@@ -11,7 +11,6 @@ public final class OFTags {
     // Items
     public static final TagKey<Item> BOUND_MELEE_WEAPONS = item("bound_melee_weapons");
     public static final TagKey<Item> BOUND_STAVES = item("bound_staves");
-    public static final TagKey<Item> BOUND_HATS = item("bound_hats");
 
     // Spells
     public static final TagKey<AbstractSpell> SPELL_BLACKLIST = ModTags.create(OriginsFamiliarity.id("bound/blacklist"));
