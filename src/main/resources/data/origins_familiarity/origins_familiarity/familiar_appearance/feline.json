@@ -1,0 +1,9 @@
+{
+  "origins": [
+    "origins:feline"
+  ],
+  "color_layers": [
+    "body",
+    "eyes"
+  ]
+}
