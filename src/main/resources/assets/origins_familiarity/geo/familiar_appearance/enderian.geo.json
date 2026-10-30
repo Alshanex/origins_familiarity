@@ -1,0 +1,220 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.enderian_familiar",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3,
+				"visible_bounds_offset": [
+					0,
+					1,
+					0
+				]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [
+						0,
+						11.46291,
+						-0.53269
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4.475,
+								8,
+								-4.475
+							],
+							"size": [
+								9,
+								9,
+								9
+							],
+							"uv": [
+								0,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "bound_hat",
+					"parent": "body",
+					"pivot": [
+						0,
+						8,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-4.4,
+								8,
+								-4.4
+							],
+							"size": [
+								8.8,
+								8.8,
+								8.8
+							],
+							"uv": {}
+						}
+					]
+				},
+				{
+					"name": "left_leg",
+					"parent": "body",
+					"pivot": [
+						2.5,
+						8,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								1.5,
+								0,
+								-1
+							],
+							"size": [
+								2,
+								8,
+								2
+							],
+							"uv": [
+								52,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "right_leg",
+					"parent": "body",
+					"pivot": [
+						-2.5,
+						8,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-3.5,
+								0,
+								-1
+							],
+							"size": [
+								2,
+								8,
+								2
+							],
+							"uv": [
+								52,
+								10
+							]
+						}
+					]
+				},
+				{
+					"name": "tag_name",
+					"parent": "body",
+					"pivot": [
+						0,
+						17,
+						-0.125
+					]
+				},
+				{
+					"name": "left_arm",
+					"parent": "body",
+					"pivot": [
+						5.5,
+						15.5,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								4.525,
+								3,
+								-1
+							],
+							"size": [
+								2,
+								13,
+								2
+							],
+							"uv": [
+								36,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "bipedHandRight",
+					"parent": "left_arm",
+					"pivot": [
+						5.525,
+						3.5,
+						0
+					]
+				},
+				{
+					"name": "right_arm",
+					"parent": "body",
+					"pivot": [
+						-5.5,
+						15.5,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-6.525,
+								3,
+								-1
+							],
+							"size": [
+								2,
+								13,
+								2
+							],
+							"uv": [
+								44,
+								0
+							]
+						}
+					]
+				},
+				{
+					"name": "hitbox",
+					"pivot": [
+						0,
+						6.5,
+						0
+					],
+					"cubes": [
+						{
+							"origin": [
+								-5,
+								0,
+								-5
+							],
+							"size": [
+								10,
+								13,
+								10
+							],
+							"uv": {}
+						}
+					]
+				}
+			]
+		}
+	]
+}
