@@ -58,7 +58,8 @@ public final class AppearanceResources {
     @Nullable
     public static ResourceLocation layerTexture(Entity entity, String layer, boolean tinted) {
         Resolved resolved = resolve(entity);
-        if (resolved == null) {
+        // No appearance, or an appearance that reuses the base model: use the base dye layers
+        if (resolved == null || !GeckoLibCache.getBakedModels().containsKey(FamiliarAppearance.geoFile(resolved.modelId()))) {
             return OriginsFamiliarity.id(BASE_LAYERS + "_" + layer + "_layer" + (tinted ? "_bw" : "") + ".png");
         }
         if (!resolved.appearance().colorLayers().contains(layer)) return null;
@@ -81,5 +82,20 @@ public final class AppearanceResources {
     public static boolean translucent(Entity entity) {
         Resolved resolved = resolve(entity);
         return resolved != null && resolved.appearance().translucent();
+    }
+
+    /** Body transparency: the phasing alpha while phased, otherwise the appearance's alpha (1 = solid). */
+    public static float alpha(Entity entity) {
+        Resolved resolved = resolve(entity);
+        if (resolved == null) return 1.0F;
+        if (entity instanceof IBoundFamiliar bound && bound.isPhased() && resolved.appearance().phasing().isPresent()) {
+            return resolved.appearance().phasing().get().alpha();
+        }
+        return resolved.appearance().alpha();
+    }
+
+    /** Needs a translucent render type: semi-transparent texture pixels, or a whole-body alpha below 1. */
+    public static boolean needsTranslucency(Entity entity) {
+        return translucent(entity) || alpha(entity) < 1.0F;
     }
 }

@@ -3,6 +3,7 @@ package net.alshanex.origins_familiarity.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.alshanex.familiarslib.entity.AbstractSpellCastingPet;
+import net.alshanex.origins_familiarity.entity.AppearanceResources;
 import net.alshanex.origins_familiarity.entity.IBoundFamiliar;
 import net.alshanex.origins_familiarity.sets.FamiliarSet;
 import net.alshanex.origins_familiarity.sets.FamiliarSets;
@@ -90,6 +91,9 @@ public class FamiliarSetLayer<T extends AbstractSpellCastingPet> extends GeoRend
     /** Same visibility rules as the body: hidden when invisible, translucent for spectators who can see it. */
     @Nullable
     private static RenderType layerRenderType(Entity animatable, ResourceLocation texture) {
+        if (AppearanceResources.needsTranslucency(animatable) && !animatable.isInvisible()) {
+            return RenderType.entityTranslucent(texture);
+        }
         if (!animatable.isInvisible()) {
             return RenderType.entityCutoutNoCull(texture);
         }

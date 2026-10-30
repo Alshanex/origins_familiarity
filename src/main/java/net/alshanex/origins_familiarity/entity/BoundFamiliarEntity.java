@@ -11,6 +11,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -37,6 +38,8 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
             SynchedEntityData.defineId(BoundFamiliarEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<String> DATA_APPEARANCE_ID =
             SynchedEntityData.defineId(BoundFamiliarEntity.class, EntityDataSerializers.STRING);
+    private static final EntityDataAccessor<Boolean> DATA_PHASED =
+            SynchedEntityData.defineId(BoundFamiliarEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final ResourceLocation AQUATIC_SWIM_SPEED = OriginsFamiliarity.id("aquatic_swim_speed");
 
@@ -116,6 +119,7 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
         super.defineSynchedData(builder);
         builder.define(DATA_SET_ID, "");
         builder.define(DATA_APPEARANCE_ID, "");
+        builder.define(DATA_PHASED, false);
     }
 
     @Override
@@ -251,5 +255,31 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
             if (waterSpeed != null) waterSpeed.removeModifier(AQUATIC_SWIM_SPEED);
         }
         boundCore().markGoalDirty();
+    }
+
+    @Override
+    public boolean isPhased() {
+        return entityData.get(DATA_PHASED);
+    }
+
+    @Override
+    public void setPhased(boolean phased) {
+        entityData.set(DATA_PHASED, phased);
+    }
+
+    @Override
+    public boolean canBeHitByProjectile() {
+        return !isPhased() && super.canBeHitByProjectile();
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return !isPhased() && super.isAttackable();
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (isPhased() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return true;
+        return super.isInvulnerableTo(source);
     }
 }

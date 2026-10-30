@@ -1,5 +1,6 @@
 package net.alshanex.origins_familiarity.entity;
 
+import dev.overgrown.apoli.power.builtin.TogglePower;
 import io.redspace.ironsspellbooks.api.registry.SpellRegistry;
 import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
@@ -297,6 +298,14 @@ public final class BoundFamiliarCore {
             pet.teleportTo(summoner.getX(), summoner.getY() + 1, summoner.getZ());
             pet.setDeltaMovement(Vec3.ZERO);
             pet.resetFallDistance();
+        }
+
+        if (pet.tickCount % 2 == 0) {
+            FamiliarAppearance appearance = FamiliarAppearances.get(pet.level().registryAccess(), ((IBoundFamiliar) pet).appearanceId());
+            boolean phased = appearance != null && appearance.phasing().isPresent()
+                    && summoner instanceof ServerPlayer owner
+                    && TogglePower.isActive(owner, appearance.phasing().get().power());
+            ((IBoundFamiliar) pet).setPhased(phased);
         }
 
         if (pet.tickCount % 20 == 0) {

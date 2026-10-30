@@ -1,0 +1,8 @@
+{
+  "origins": ["origins:phantom"],
+  "alpha": 0.7,
+  "phasing": {
+    "power": "origins:phantom/phantomize",
+    "alpha": 0.3
+  }
+}

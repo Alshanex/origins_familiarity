@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.util.ClientUtil;
+import software.bernie.geckolib.util.Color;
 
 /** Renderer for both forms, sharing one model and texture set. */
 public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends HumanoidRenderer<T> {
@@ -61,7 +62,7 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
 
     @Override
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
-        if (AppearanceResources.translucent(animatable)) {
+        if (AppearanceResources.needsTranslucency(animatable)) {
             return RenderType.entityTranslucent(texture);
         }
         return animatable.isInvisible() ? RenderType.itemEntityTranslucentCull(texture) : RenderType.entityCutout(texture);
@@ -80,6 +81,14 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
         if (layersOnly && !isReRender) buffer = NO_OP;
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender,
                 partialTick, packedLight, packedOverlay, colour);
+    }
+
+    @Override
+    public Color getRenderColor(T animatable, float partialTick, int packedLight) {
+        Color base = super.getRenderColor(animatable, partialTick, packedLight);
+        float alpha = AppearanceResources.alpha(animatable);
+        if (alpha >= 1.0F) return base;
+        return Color.ofRGBA(base.getRed(), base.getGreen(), base.getBlue(), Math.round(base.getAlpha() * alpha));
     }
 
     /** A dye layer whose textures follow the familiar's appearance, and that steps aside while only the layers are drawn. */
@@ -109,7 +118,7 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
             @Nullable
             @Override
             protected RenderType getLayerRenderType(T animatable, ResourceLocation texture) {
-                if (AppearanceResources.translucent(animatable)) {
+                if (AppearanceResources.needsTranslucency(animatable)) {
                     if (animatable.isInvisible() && animatable.isInvisibleTo(ClientUtil.getClientPlayer())) return null;
                     return RenderType.entityTranslucent(texture);
                 }

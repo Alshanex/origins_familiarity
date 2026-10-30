@@ -21,4 +21,9 @@ public interface IBoundFamiliar {
     ResourceLocation appearanceId();
 
     void setAppearanceId(@Nullable ResourceLocation appearanceId);
+
+    /** Whether the owner's phasing power is on: attacks pass through and it's more transparent. */
+    boolean isPhased();
+
+    void setPhased(boolean phased);
 }

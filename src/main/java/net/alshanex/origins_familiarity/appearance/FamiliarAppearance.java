@@ -9,7 +9,8 @@ import java.util.Optional;
 
 /** A bound familiar appearance for some origins, loaded from data/<namespace>/origins_familiarity/familiar_appearance/<id>.json. */
 public record FamiliarAppearance(List<ResourceLocation> origins, Optional<ResourceLocation> model,
-                                 List<String> hiddenWhenFlying, List<String> colorLayers, boolean translucent, boolean aquatic) {
+                                 List<String> hiddenWhenFlying, List<String> colorLayers, boolean translucent,
+                                 boolean aquatic, float alpha, Optional<Phasing> phasing) {
     public static final String BODY = "body";
     public static final String EYES = "eyes";
     public static final List<String> DEFAULT_HIDDEN_WHEN_FLYING = List.of("left_leg", "right_leg");
@@ -20,8 +21,17 @@ public record FamiliarAppearance(List<ResourceLocation> origins, Optional<Resour
             Codec.STRING.listOf().optionalFieldOf("hidden_when_flying", DEFAULT_HIDDEN_WHEN_FLYING).forGetter(FamiliarAppearance::hiddenWhenFlying),
             Codec.STRING.listOf().optionalFieldOf("color_layers", List.of(BODY, EYES)).forGetter(FamiliarAppearance::colorLayers),
             Codec.BOOL.optionalFieldOf("translucent", false).forGetter(FamiliarAppearance::translucent),
-            Codec.BOOL.optionalFieldOf("aquatic", false).forGetter(FamiliarAppearance::aquatic)
+            Codec.BOOL.optionalFieldOf("aquatic", false).forGetter(FamiliarAppearance::aquatic),
+            Codec.floatRange(0.0F, 1.0F).optionalFieldOf("alpha", 1.0F).forGetter(FamiliarAppearance::alpha),
+            Phasing.CODEC.optionalFieldOf("phasing").forGetter(FamiliarAppearance::phasing)
     ).apply(instance, FamiliarAppearance::new));
+
+    public record Phasing(ResourceLocation power, float alpha) {
+        public static final Codec<Phasing> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("power").forGetter(Phasing::power),
+                Codec.floatRange(0.0F, 1.0F).optionalFieldOf("alpha", 0.3F).forGetter(Phasing::alpha)
+        ).apply(instance, Phasing::new));
+    }
 
     /** The id its files are named after: "model" if given, otherwise the appearance's own id. */
     public ResourceLocation modelId(ResourceLocation appearanceId) {
