@@ -1,0 +1,11 @@
+{
+  "origins": [
+    "origins:blazeborn"
+  ],
+  "hidden_when_flying": [],
+  "color_layers": [
+    "body",
+    "eyes"
+  ],
+  "translucent": true
+}
