@@ -1,0 +1,10 @@
+{
+  "origins": [
+    "origins:arachnid"
+  ],
+  "hidden_when_flying": [],
+  "color_layers": [
+    "body",
+    "eyes"
+  ]
+}
