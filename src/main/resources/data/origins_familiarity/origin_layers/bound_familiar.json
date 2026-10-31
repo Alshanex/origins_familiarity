@@ -1,9 +1,35 @@
 {
   "order": 1,
   "enabled": true,
+  "auto_choose": true,
   "origins": [
-    "origins_familiarity:terrestrial_familiar",
-    "origins_familiarity:flying_familiar"
+    {
+      "condition": { "type": "origins:origin", "layer": "origins:origin", "origin": "origins:human" },
+      "origins": ["origins_familiarity:terrestrial_familiar", "origins_familiarity:flying_familiar"]
+    },
+    {
+      "condition": {
+        "type": "origins:origin", "layer": "origins:origin",
+        "origin": ["origins:arachnid", "origins:enderian", "origins:feline", "origins:merling", "origins:shulk", "origins:slimekin"]
+      },
+      "origins": ["origins_familiarity:terrestrial_familiar"]
+    },
+    {
+      "condition": {
+        "type": "origins:origin", "layer": "origins:origin",
+        "origin": ["origins:avian", "origins:blazeborn", "origins:buzzborne", "origins:elytrian"]
+      },
+      "origins": ["origins_familiarity:flying_familiar"]
+    },
+    {
+      "condition": {
+        "type": "origins:origin", "layer": "origins:origin", "inverted": true,
+        "origin": ["origins:human", "origins:arachnid", "origins:enderian", "origins:feline", "origins:merling",
+          "origins:shulk", "origins:slimekin", "origins:avian", "origins:blazeborn", "origins:buzzborne",
+          "origins:elytrian"]
+      },
+      "origins": ["origins_familiarity:terrestrial_familiar", "origins_familiarity:flying_familiar"]
+    }
   ],
   "allow_random": false,
   "hidden": false
