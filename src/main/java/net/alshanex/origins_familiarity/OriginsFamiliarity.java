@@ -1,7 +1,9 @@
 package net.alshanex.origins_familiarity;
 
+import dev.overgrown.apoli.condition.ConditionTypes;
 import net.alshanex.familiarslib.registry.FCreativeTab;
 import net.alshanex.origins_familiarity.appearance.FamiliarAppearances;
+import net.alshanex.origins_familiarity.origins.OriginAppearancesCondition;
 import net.alshanex.origins_familiarity.registry.OFDataAttachments;
 import net.alshanex.origins_familiarity.registry.OFDataComponents;
 import net.alshanex.origins_familiarity.registry.OFEntityRegistry;
@@ -53,13 +55,15 @@ public class OriginsFamiliarity {
 
         OFItems.register(modEventBus);
 
+        ConditionTypes.ENTITY.register(id("origin_appearances"), new OriginAppearancesCondition());
+
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(FamiliarSets::registerRegistry);
         modEventBus.addListener(FamiliarAppearances::registerRegistry);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, OFConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, OFConfig.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

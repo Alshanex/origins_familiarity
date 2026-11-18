@@ -1,6 +1,7 @@
 package net.alshanex.origins_familiarity.appearance;
 
 import dev.overgrown.origins.origin.OriginView;
+import net.alshanex.origins_familiarity.OFConfig;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -35,6 +36,7 @@ public final class FamiliarAppearances {
 
     @Nullable
     public static ResourceLocation forOwner(ServerPlayer owner) {
+        if (!OFConfig.originAppearances()) return null;
         ResourceLocation origin = OriginView.chosen(owner).get(MAIN_LAYER);
         if (origin == null) return null;
         return owner.registryAccess().registry(REGISTRY_KEY)

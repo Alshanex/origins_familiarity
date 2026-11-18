@@ -4,30 +4,40 @@
   "auto_choose": true,
   "origins": [
     {
-      "condition": { "type": "origins:origin", "layer": "origins:origin", "origin": "origins:human" },
+      "condition": { "type": "origins_familiarity:origin_appearances", "inverted": true },
       "origins": ["origins_familiarity:terrestrial_familiar", "origins_familiarity:flying_familiar"]
     },
     {
-      "condition": {
-        "type": "origins:origin", "layer": "origins:origin",
-        "origin": ["origins:arachnid", "origins:enderian", "origins:feline", "origins:merling", "origins:shulk", "origins:slimekin"]
-      },
+      "condition": { "type": "apoli:and", "conditions": [
+        { "type": "origins_familiarity:origin_appearances" },
+        { "type": "origins:origin", "layer": "origins:origin", "origin": "origins:human" }
+      ]},
+      "origins": ["origins_familiarity:terrestrial_familiar", "origins_familiarity:flying_familiar"]
+    },
+    {
+      "condition": { "type": "apoli:and", "conditions": [
+        { "type": "origins_familiarity:origin_appearances" },
+        { "type": "origins:origin", "layer": "origins:origin",
+          "origin": ["origins:arachnid", "origins:enderian", "origins:feline", "origins:merling", "origins:shulk", "origins:slimekin"] }
+      ]},
       "origins": ["origins_familiarity:terrestrial_familiar"]
     },
     {
-      "condition": {
-        "type": "origins:origin", "layer": "origins:origin",
-        "origin": ["origins:avian", "origins:blazeborn", "origins:buzzborne", "origins:elytrian"]
-      },
+      "condition": { "type": "apoli:and", "conditions": [
+        { "type": "origins_familiarity:origin_appearances" },
+        { "type": "origins:origin", "layer": "origins:origin",
+          "origin": ["origins:avian", "origins:blazeborn", "origins:buzzborne", "origins:elytrian"] }
+      ]},
       "origins": ["origins_familiarity:flying_familiar"]
     },
     {
-      "condition": {
-        "type": "origins:origin", "layer": "origins:origin", "inverted": true,
-        "origin": ["origins:human", "origins:arachnid", "origins:enderian", "origins:feline", "origins:merling",
-          "origins:shulk", "origins:slimekin", "origins:avian", "origins:blazeborn", "origins:buzzborne",
-          "origins:elytrian"]
-      },
+      "condition": { "type": "apoli:and", "conditions": [
+        { "type": "origins_familiarity:origin_appearances" },
+        { "type": "origins:origin", "layer": "origins:origin", "inverted": true,
+          "origin": ["origins:human", "origins:arachnid", "origins:enderian", "origins:feline", "origins:merling",
+            "origins:shulk", "origins:slimekin", "origins:avian", "origins:blazeborn", "origins:buzzborne",
+            "origins:elytrian"] }
+      ]},
       "origins": ["origins_familiarity:terrestrial_familiar", "origins_familiarity:flying_familiar"]
     }
   ],

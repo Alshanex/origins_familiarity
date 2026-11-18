@@ -46,5 +46,14 @@ public final class OFConfig {
             .comment("Summon the bound familiar right after the player chooses its form.")
             .define("summonWhenCreated", true);
 
+    public static final ModConfigSpec.BooleanValue ORIGIN_APPEARANCES = BUILDER
+            .comment("Give bound familiars a look matching their owner's origin, and lock some origins to one form (WIP).",
+                    "When false: every familiar uses the base look and every origin can choose terrestrial or flying.")
+            .define("originAppearances", false);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
+
+    public static boolean originAppearances() {
+        return !SPEC.isLoaded() || ORIGIN_APPEARANCES.get();
+    }
 }
