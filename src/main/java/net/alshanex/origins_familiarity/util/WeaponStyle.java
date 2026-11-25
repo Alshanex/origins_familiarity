@@ -9,15 +9,22 @@ import net.minecraft.world.item.*;
 public enum WeaponStyle {
     MELEE,
     STAFF,
+    RANGED,
     UNARMED;
 
     public static WeaponStyle of(ItemStack stack) {
-        return stack.isEmpty() ? UNARMED : isStaff(stack) ? STAFF : MELEE;
+        if (stack.isEmpty()) return UNARMED;
+        if (isRanged(stack)) return RANGED;
+        return isStaff(stack) ? STAFF : MELEE;
     }
 
     /** Can be handed to the bound familiar as its weapon. */
     public static boolean isWeapon(ItemStack stack) {
-        return isStaff(stack) || isMeleeWeapon(stack);
+        return isRanged(stack) || isStaff(stack) || isMeleeWeapon(stack);
+    }
+
+    public static boolean isRanged(ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() instanceof ProjectileWeaponItem;
     }
 
     public static boolean isStaff(ItemStack stack) {

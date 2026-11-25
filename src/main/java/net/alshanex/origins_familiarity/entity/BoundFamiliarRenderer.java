@@ -10,7 +10,6 @@ import net.alshanex.familiarslib.render.FamiliarColorLayer;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.appearance.FamiliarAppearance;
 import net.alshanex.origins_familiarity.client.render.BoundHatLayer;
-import net.alshanex.origins_familiarity.client.render.FamiliarSetLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -45,7 +44,6 @@ public class BoundFamiliarRenderer<T extends AbstractSpellCastingPet> extends Hu
         addRenderLayer(bodyColorLayer(BoundFamiliarCore.BODY_LAYER, FamiliarAppearance.BODY));
         addRenderLayer(bodyColorLayer(BoundFamiliarCore.EYES_LAYER, FamiliarAppearance.EYES).glowing());
 
-        addRenderLayer(new FamiliarSetLayer<>(this));
         addRenderLayer(new BoundHatLayer<>(this));
     }
 

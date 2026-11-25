@@ -7,6 +7,11 @@
   "familiar_set.origins_familiarity.archmage": "Archmage Familiar Set",
 
   "tooltip.origins_familiarity.set.unknown": "Unknown set",
+  "tooltip.origins_familiarity.set.helmet": "Helmet: %s",
+  "tooltip.origins_familiarity.set.weapon": "Weapon: %s",
+  "tooltip.origins_familiarity.set.style.melee": "Fights in melee",
+  "tooltip.origins_familiarity.set.style.caster": "Fights as a caster",
+  "tooltip.origins_familiarity.set.style.ranger": "Fights as a ranger",
   "tooltip.origins_familiarity.set.familiar_bonuses": "On your bound familiar:",
   "tooltip.origins_familiarity.set.owner_bonuses": "On you, while it's summoned:",
   "tooltip.origins_familiarity.set.spells": "Spells (familiar and you):",
@@ -30,13 +35,14 @@
   "message.origins_familiarity.spell_upgraded": "Your bound familiar improved %s to level %s",
   "message.origins_familiarity.spell_known": "Your bound familiar already knows %s",
   "message.origins_familiarity.spell_blacklisted": "Your bound familiar can't learn %s",
+  "message.origins_familiarity.set_locked": "Its set's helmet and weapon can't be changed. Take the set off first (sneak + empty hand)",
 
   "layer.origins_familiarity.bound_familiar.name": "Bound Familiar",
   "layer.origins_familiarity.bound_familiar.choose_origin.name": "Choose your Bound Familiar",
   "layer.origins_familiarity.bound_familiar.view_origin.name": "Your Bound Familiar",
 
   "origin.origins_familiarity.terrestrial_familiar.name": "Terrestrial",
-  "origin.origins_familiarity.terrestrial_familiar.description": "Walks at your side. Fights up close as a melee spellcaster, or casts from range with a staff.",
+  "origin.origins_familiarity.terrestrial_familiar.description": "Walks at your side. Fights up close as a melee spellcaster, casts from range with a staff, or shoots with a bow or crossbow.",
   "origin.origins_familiarity.flying_familiar.name": "Flying",
-  "origin.origins_familiarity.flying_familiar.description": "Hovers around you. Strikes and retreats as a skirmisher, or casts from the air with a staff."
+  "origin.origins_familiarity.flying_familiar.description": "Hovers around you. Strikes and retreats as a skirmisher, casts from the air with a staff, or shoots with a bow or crossbow."
 }

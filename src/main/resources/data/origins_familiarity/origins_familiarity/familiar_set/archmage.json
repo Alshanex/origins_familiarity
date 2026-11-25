@@ -3,6 +3,7 @@
     "id": "irons_spellbooks:wizard_hat",
     "components": { "minecraft:dyed_color": { "rgb": 7184612 } }
   },
+  "weapon": "irons_spellbooks:artificer_cane",
   "attributes": [
     { "attribute": "irons_spellbooks:spell_power", "amount": 0.15, "operation": "add_multiplied_base" },
     { "attribute": "minecraft:generic.armor", "amount": 4 }

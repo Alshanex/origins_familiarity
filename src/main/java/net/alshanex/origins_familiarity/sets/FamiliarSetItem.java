@@ -4,6 +4,7 @@ import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.registry.OFDataComponents;
 import net.alshanex.origins_familiarity.registry.OFItems;
+import net.alshanex.origins_familiarity.util.WeaponStyle;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
@@ -48,7 +49,15 @@ public class FamiliarSetItem extends Item {
             return;
         }
 
+        set.helmet().ifPresent(helmet -> lines.add(Component.translatable("tooltip.origins_familiarity.set.helmet",
+                helmet.getHoverName()).withStyle(ChatFormatting.GRAY)));
+        set.weapon().ifPresent(weapon -> lines.add(Component.translatable("tooltip.origins_familiarity.set.weapon",
+                weapon.getHoverName()).withStyle(ChatFormatting.GRAY)));
+        lines.add(Component.translatable("tooltip.origins_familiarity.set.style." + styleKey(set))
+                .withStyle(ChatFormatting.DARK_AQUA));
+
         if (!set.attributes().isEmpty()) {
+            lines.add(Component.empty());
             lines.add(Component.translatable("tooltip.origins_familiarity.set.familiar_bonuses").withStyle(ChatFormatting.GRAY));
             set.attributes().forEach(bonus -> lines.add(bonusLine(bonus)));
         }
@@ -67,6 +76,15 @@ public class FamiliarSetItem extends Item {
                         spell.getDisplayName(null), bonus.level()).withStyle(spell.getSchoolType().getDisplayName().getStyle())));
             }
         }
+    }
+
+    /** How the set's weapon makes the familiar fight (a staff or no weapon only casts if it knows spells). */
+    private static String styleKey(FamiliarSet set) {
+        return switch (WeaponStyle.of(set.weapon().orElse(ItemStack.EMPTY))) {
+            case RANGED -> "ranger";
+            case MELEE -> "melee";
+            case STAFF, UNARMED -> "caster";
+        };
     }
 
     private static Component bonusLine(FamiliarSet.AttributeBonus bonus) {

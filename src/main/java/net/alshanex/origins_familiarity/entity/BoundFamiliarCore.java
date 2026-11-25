@@ -18,6 +18,7 @@ import net.alshanex.origins_familiarity.sets.SetBonuses;
 import net.alshanex.origins_familiarity.util.OFTags;
 import net.alshanex.origins_familiarity.util.WeaponStyle;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -28,7 +29,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +39,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /** State and behaviour shared by both forms of the bound familiar. */
 public final class BoundFamiliarCore {
@@ -69,6 +73,12 @@ public final class BoundFamiliarCore {
     private static final int MAX_DIRTY_TICKS = 100;
 
     public enum LearnResult { LEARNED, UPGRADED, ALREADY_KNOWN }
+
+    /** Which attack goal the familiar uses. */
+    public enum CombatStyle { MELEE, CASTER, RANGER }
+
+    /** Marks the helmet and weapon a set puts on the familiar, so they're never mistaken for the player's own. */
+    private static final String SET_PIECE_KEY = "origins_familiarity_set_piece";
 
     public record GapCloser(AbstractSpell spell, int level) {}
 
@@ -134,20 +144,70 @@ public final class BoundFamiliarCore {
         return !setItem.isEmpty();
     }
 
+    /**
+     * Puts a set on: its helmet and weapon go in the head and main hand slots, and a helmet or weapon of the
+     * player's own that was there goes back to the owner.
+     */
     public void equipSet(ItemStack stack) {
         setItem = stack.copyWithCount(1);
         ((IBoundFamiliar) pet).setEquippedSetId(FamiliarSetItem.setId(setItem));
+        FamiliarSet set = activeSet();
+        if (set != null) syncSetEquipment(set);
         markGoalDirty();
     }
 
-    /** Takes the set off and returns its item (empty if none was worn). */
+    /** Takes the set off (its pieces vanish) and returns its item (empty if none was worn). */
     public ItemStack removeSet() {
         ItemStack removed = setItem;
         setItem = ItemStack.EMPTY;
         ((IBoundFamiliar) pet).setEquippedSetId(null);
+        for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.MAINHAND}) {
+            if (isSetPiece(pet.getItemBySlot(slot))) pet.setItemSlot(slot, ItemStack.EMPTY);
+        }
         SetBonuses.apply(pet, List.of(), SET_BONUS_PREFIX, appliedSetBonuses);
         markGoalDirty();
         return removed;
+    }
+
+    /** A copy of a set's helmet or weapon, marked as a set piece. */
+    public static ItemStack setPiece(ItemStack stack) {
+        ItemStack piece = stack.copyWithCount(1);
+        CustomData.update(DataComponents.CUSTOM_DATA, piece, tag -> tag.putBoolean(SET_PIECE_KEY, true));
+        return piece;
+    }
+
+    public static boolean isSetPiece(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        return data != null && data.contains(SET_PIECE_KEY);
+    }
+
+    /**
+     * Makes the head and main hand hold exactly the set's pieces. Run on equip and once a second, so a set
+     * changed by a datapack updates, and familiars that wore a set before sets had pieces give their own
+     * weapon and helmet back.
+     */
+    private void syncSetEquipment(FamiliarSet set) {
+        syncSlot(EquipmentSlot.HEAD, set.helmet());
+        syncSlot(EquipmentSlot.MAINHAND, set.weapon());
+    }
+
+    private void syncSlot(EquipmentSlot slot, Optional<ItemStack> piece) {
+        ItemStack wanted = piece.map(BoundFamiliarCore::setPiece).orElse(ItemStack.EMPTY);
+        ItemStack current = pet.getItemBySlot(slot);
+        if (ItemStack.matches(current, wanted)) return;
+        if (!current.isEmpty() && !isSetPiece(current)) {
+            returnToOwner(current.copy());
+        }
+        pet.setItemSlot(slot, wanted);
+        pet.setDropChance(slot, 0.0F);
+    }
+
+    private void returnToOwner(ItemStack stack) {
+        if (pet.getSummoner() instanceof Player owner) {
+            owner.getInventory().placeItemBackInInventory(stack);
+        } else {
+            pet.spawnAtLocation(stack);
+        }
     }
 
     @Nullable
@@ -157,9 +217,16 @@ public final class BoundFamiliarCore {
         return stack.isEmpty() ? null : FamiliarSetItem.setId(stack);
     }
 
-    /** Caster when it knows at least one enabled spell, unless it holds a melee weapon. No spells = melee, staff or not. */
-    public boolean useCasterStyle(SpellSet set) {
-        return !set.isEmpty() && WeaponStyle.of(pet.getMainHandItem()) != WeaponStyle.MELEE;
+    /**
+     * Bow or crossbow: ranger (shoots, mixing in its spells). Melee weapon: melee.
+     * Staff or empty hand: caster when it has at least one spell, otherwise melee.
+     */
+    public CombatStyle combatStyle(SpellSet set) {
+        return switch (WeaponStyle.of(pet.getMainHandItem())) {
+            case RANGED -> CombatStyle.RANGER;
+            case MELEE -> CombatStyle.MELEE;
+            case STAFF, UNARMED -> set.isEmpty() ? CombatStyle.MELEE : CombatStyle.CASTER;
+        };
     }
 
     /** Enabled learned spells plus the worn set's spells, sorted into the four categories by spell tags. */
@@ -311,6 +378,7 @@ public final class BoundFamiliarCore {
         if (pet.tickCount % 20 == 0) {
             FamiliarSet worn = activeSet();
             SetBonuses.apply(pet, worn == null ? List.of() : worn.attributes(), SET_BONUS_PREFIX, appliedSetBonuses);
+            if (worn != null && hasSet() && summoner != null) syncSetEquipment(worn);
         }
 
         if (pet.tickCount % 20 == 0 && summoner instanceof ServerPlayer owner && !pet.getIsInHouse()) {

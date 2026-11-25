@@ -15,19 +15,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A familiar set (armor only), loaded from data/<namespace>/origins_familiarity/familiar_set/<id>.json.
+ * A familiar set, loaded from data/<namespace>/origins_familiarity/familiar_set/<id>.json: a helmet and a weapon
+ * worn together. While worn, they replace the familiar's own helmet and weapon and can't be swapped one by one.
+ * The weapon decides how it fights (staff = caster, bow/crossbow = ranger, anything else = melee), and both items'
+ * own attributes apply, on top of the set's "attributes".
  */
-public record FamiliarSet(Optional<ResourceLocation> model, Optional<ItemStack> helmet,
+public record FamiliarSet(Optional<ItemStack> helmet, Optional<ItemStack> weapon,
                           List<AttributeBonus> attributes, List<AttributeBonus> ownerAttributes,
                           List<SpellBonus> spells) {
 
     /** "minecraft:iron_helmet" or {"id": "minecraft:leather_helmet", "components": {...}} */
-    private static final Codec<ItemStack> HELMET_CODEC =
+    private static final Codec<ItemStack> ITEM_CODEC =
             Codec.withAlternative(ItemStack.SIMPLE_ITEM_CODEC, ItemStack.SINGLE_ITEM_CODEC);
 
     public static final Codec<FamiliarSet> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("model").forGetter(FamiliarSet::model),
-            HELMET_CODEC.optionalFieldOf("helmet").forGetter(FamiliarSet::helmet),
+            ITEM_CODEC.optionalFieldOf("helmet").forGetter(FamiliarSet::helmet),
+            ITEM_CODEC.optionalFieldOf("weapon").forGetter(FamiliarSet::weapon),
             AttributeBonus.CODEC.listOf().optionalFieldOf("attributes", List.of()).forGetter(FamiliarSet::attributes),
             AttributeBonus.CODEC.listOf().optionalFieldOf("owner_attributes", List.of()).forGetter(FamiliarSet::ownerAttributes),
             SpellBonus.CODEC.listOf().optionalFieldOf("spells", List.of()).forGetter(FamiliarSet::spells)
@@ -53,20 +56,5 @@ public record FamiliarSet(Optional<ResourceLocation> model, Optional<ItemStack> 
             AbstractSpell spell = SpellRegistry.getSpell(this.spell);
             return spell == null || spell == SpellRegistry.none() || !spell.isEnabled() ? null : spell;
         }
-    }
-
-    /** The model id: "model" if given, otherwise the set's own id. */
-    public ResourceLocation modelId(ResourceLocation setId) {
-        return model.orElse(setId);
-    }
-
-    /** assets/<namespace>/geo/familiar_set/<path>.geo.json */
-    public static ResourceLocation geoFile(ResourceLocation modelId) {
-        return ResourceLocation.fromNamespaceAndPath(modelId.getNamespace(), "geo/familiar_set/" + modelId.getPath() + ".geo.json");
-    }
-
-    /** assets/<namespace>/textures/familiar_set/<path>.png */
-    public static ResourceLocation textureFile(ResourceLocation modelId) {
-        return ResourceLocation.fromNamespaceAndPath(modelId.getNamespace(), "textures/familiar_set/" + modelId.getPath() + ".png");
     }
 }

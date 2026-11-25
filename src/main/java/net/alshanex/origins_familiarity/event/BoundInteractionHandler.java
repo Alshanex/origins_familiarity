@@ -37,8 +37,10 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Owner right-clicks on the bound familiar:
  * - Spell scroll: the familiar learns the spell (unless blacklisted). Scroll is used up.
- * - Weapon (melee or staff): goes in its main hand. The previous one is given back.
- * - Sneak + empty main hand: takes the weapon, then the hat back.
+ * - Weapon (melee, staff, bow or crossbow): goes in its main hand. The previous one is given back.
+ * - Helmet (anything worn on the head): goes on its head. Sneak to pick the head for items that are both.
+ * - Familiar set: replaces its helmet and weapon with the set's. Locked until the set comes off.
+ * - Sneak + empty main hand: takes the set off; without a set, takes the weapon, then the helmet back.
  * Shrunk cosmetics are left to familiarslib.
  */
 @EventBusSubscriber(modid = OriginsFamiliarity.MODID)
@@ -75,7 +77,8 @@ public final class BoundInteractionHandler {
 
         if (stack.isEmpty()) {
             if (event.getHand() == InteractionHand.MAIN_HAND && player.isShiftKeyDown()) {
-                if (familiar.getMainHandItem().isEmpty() && bound.boundCore().hasSet()) {
+                // A set comes off whole: its helmet and weapon can't be taken one by one
+                if (bound.boundCore().hasSet()) {
                     accept(event, clientSide);
                     if (!clientSide) unequipSet(player, familiar, bound);
                     return;
@@ -91,20 +94,31 @@ public final class BoundInteractionHandler {
             return;
         }
 
-        EquipmentSlot slot = slotFor(stack);
-        if (slot != null) {
-            accept(event, clientSide);
-            if (!clientSide) equip(player, familiar, bound, stack, slot);
+        EquipmentSlot slot = slotFor(familiar, stack, player.isShiftKeyDown());
+        if (slot == null) {
+            return;
         }
-        if (slot != null) {
-            accept(event, clientSide);
-            if (!clientSide) equip(player, familiar, bound, stack, slot);
+        accept(event, clientSide);
+        if (clientSide) {
+            return;
         }
+        if (bound.boundCore().hasSet()) {
+            player.displayClientMessage(Component.translatable("message.origins_familiarity.set_locked")
+                    .withStyle(ChatFormatting.YELLOW), true);
+            return;
+        }
+        equip(player, familiar, bound, stack, slot);
     }
 
+    /** Main hand for weapons, head for helmets. Items that are both go in the hand, or on the head while sneaking. */
     @Nullable
-    private static EquipmentSlot slotFor(ItemStack stack) {
-        return WeaponStyle.isWeapon(stack) ? EquipmentSlot.MAINHAND : null;
+    private static EquipmentSlot slotFor(AbstractSpellCastingPet familiar, ItemStack stack, boolean sneaking) {
+        boolean weapon = WeaponStyle.isWeapon(stack);
+        boolean helmet = familiar.getEquipmentSlotForItem(stack) == EquipmentSlot.HEAD;
+        if (weapon && helmet) return sneaking ? EquipmentSlot.HEAD : EquipmentSlot.MAINHAND;
+        if (weapon) return EquipmentSlot.MAINHAND;
+        if (helmet) return EquipmentSlot.HEAD;
+        return null;
     }
 
     private static void accept(PlayerInteractEvent.EntityInteract event, boolean clientSide) {
@@ -134,17 +148,14 @@ public final class BoundInteractionHandler {
         FamiliarManager.updateFamiliarData(familiar);
     }
 
-    /** Puts the set on: the current head item and previous set go back to the player. The weapon stays. */
+    /**
+     * Puts the set on. The previous set comes back as its item; a helmet and weapon of the player's own go back to the player.
+     */
     private static void equipSet(Player player, AbstractSpellCastingPet familiar, IBoundFamiliar bound, ItemStack stack) {
         FamiliarSet set = FamiliarSets.get(player.level().registryAccess(), FamiliarSetItem.setId(stack));
         if (set == null) {
             player.displayClientMessage(Component.translatable("tooltip.origins_familiarity.set.unknown").withStyle(ChatFormatting.RED), true);
             return;
-        }
-        ItemStack head = familiar.getItemBySlot(EquipmentSlot.HEAD);
-        if (!head.isEmpty()) {
-            familiar.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-            player.getInventory().placeItemBackInInventory(head);
         }
         ItemStack previousSet = bound.boundCore().removeSet();
         bound.boundCore().equipSet(stack);

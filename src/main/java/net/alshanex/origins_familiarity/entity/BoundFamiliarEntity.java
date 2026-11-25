@@ -6,6 +6,7 @@ import net.alshanex.familiarslib.entity.AbstractMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
 import net.alshanex.origins_familiarity.OriginsFamiliarity;
 import net.alshanex.origins_familiarity.bound.BoundStun;
+import net.alshanex.origins_familiarity.entity.goal.RangerAttackGoal;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -24,9 +25,11 @@ import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.neoforged.neoforge.fluids.FluidType;
+import software.bernie.geckolib.animation.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -67,7 +70,13 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
         BoundFamiliarCore.SpellSet set = core.spellSet();
         WizardAttackGoal goal;
 
-        if (core.useCasterStyle(set)) {
+        BoundFamiliarCore.CombatStyle style = core.combatStyle(set);
+        if (style == BoundFamiliarCore.CombatStyle.RANGER) {
+            goal = new RangerAttackGoal(this, 1.0f, 30, 50)
+                    .setSpells(set.attack(), set.defense(), set.movement(), set.support())
+                    .setAllowFleeing(true)
+                    .setSpellQuality(min, max);
+        } else if (style == BoundFamiliarCore.CombatStyle.CASTER) {
             goal = new WizardAttackGoal(this, 1.25f, 35, 60)
                     .setSpells(set.attack(), set.defense(), set.movement(), set.support())
                     .setAllowFleeing(true)
@@ -92,6 +101,22 @@ public class BoundFamiliarEntity extends AbstractMeleeSpellCastingPet implements
 
         core.setCurrentGoal(goal);
         return goal;
+    }
+
+    private static final RawAnimation DRAW_BOW = RawAnimation.begin().thenLoop("draw_bow");
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {
+        super.registerControllers(registrar);
+        registrar.add(new AnimationController(this, "ranger_draw", 3, this::rangerDrawPredicate));
+    }
+
+    private PlayState rangerDrawPredicate(AnimationState event) {
+        if (isUsingItem() && getUseItem().getItem() instanceof ProjectileWeaponItem) {
+            event.getController().setAnimation(DRAW_BOW);
+            return PlayState.CONTINUE;
+        }
+        return PlayState.STOP;
     }
 
     @Override

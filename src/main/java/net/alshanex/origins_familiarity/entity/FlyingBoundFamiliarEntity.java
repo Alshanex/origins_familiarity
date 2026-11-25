@@ -5,6 +5,7 @@ import io.redspace.ironsspellbooks.entity.mobs.goals.WizardAttackGoal;
 import net.alshanex.familiarslib.entity.AbstractFlyingMeleeSpellCastingPet;
 import net.alshanex.familiarslib.util.familiars.FamiliarGoals;
 import net.alshanex.origins_familiarity.bound.BoundStun;
+import net.alshanex.origins_familiarity.entity.goal.FlyingRangerAttackGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -16,12 +17,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidType;
-import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
+import software.bernie.geckolib.animation.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -60,7 +60,17 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
         BoundFamiliarCore.SpellSet set = core.spellSet();
         WizardAttackGoal goal;
 
-        if (core.useCasterStyle(set)) {
+        BoundFamiliarCore.CombatStyle style = core.combatStyle(set);
+        if (style == BoundFamiliarCore.CombatStyle.RANGER) {
+            goal = new FlyingRangerAttackGoal(this, 1f, 30, 50)
+                    .setPreferredHeight(4.0f)
+                    .setCombatRanges(6.0f, 10.0f, 15.0f)
+                    .setThreatAwarenessRadius(10.0f)
+                    .setSpells(set.attack(), set.defense(), set.movement(), set.support())
+                    .setIsFlying()
+                    .setAllowFleeing(true)
+                    .setSpellQuality(min, max);
+        } else if (style == BoundFamiliarCore.CombatStyle.CASTER) {
             goal = new FamiliarGoals.FlyingWizardAttackGoal(this, 1f, 35, 55)
                     .setPreferredHeight(4.0f)
                     .setCombatRanges(5.0f, 7.0f, 11.0f)
@@ -95,6 +105,22 @@ public class FlyingBoundFamiliarEntity extends AbstractFlyingMeleeSpellCastingPe
 
         core.setCurrentGoal(goal);
         return goal;
+    }
+
+    private static final RawAnimation DRAW_BOW = RawAnimation.begin().thenLoop("draw_bow");
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {
+        super.registerControllers(registrar);
+        registrar.add(new AnimationController(this, "ranger_draw", 3, this::rangerDrawPredicate));
+    }
+
+    private PlayState rangerDrawPredicate(AnimationState event) {
+        if (isUsingItem() && getUseItem().getItem() instanceof ProjectileWeaponItem) {
+            event.getController().setAnimation(DRAW_BOW);
+            return PlayState.CONTINUE;
+        }
+        return PlayState.STOP;
     }
 
     @Override
